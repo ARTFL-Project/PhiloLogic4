@@ -145,41 +145,71 @@ def get_cooccurrence_groups(
         philo_object = "philo_sent_id"
     elif level == "para":
         philo_object = "philo_para_id"
-    # with sqlite3.connect(f"{db_path}/words.db") as conn:
-    #     cursor = conn.cursor()
-    #     subqueries = []
-    #     all_args = []
-    #     for i, words in enumerate(word_groups):
-    #         placeholders = ", ".join("?" * len(words))
-    #         subquery = f"(SELECT {philo_object}, philo_ids, rowid FROM words WHERE word IN ({placeholders})) AS grp{i}"
-    #         subqueries.append(subquery)
-    #         all_args.extend(words)
-
-    #     join_conditions = " AND ".join(
-    #         f"grp0.{philo_object} = grp{i}.{philo_object}" for i in range(1, len(word_groups))
-    #     )
-
-    #     # Construct the main query
-    #     query = f"SELECT grp0.{philo_object}, {', '.join(f'grp{i}.philo_ids AS philo_ids{i}' for i in range(len(word_groups)))} FROM {' INNER JOIN '.join(subqueries)} ON {join_conditions} ORDER BY grp0.rowid"
-
-    #     cursor.execute(query, all_args)
     with sqlite3.connect(f"{db_path}/words.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("PRAGMA temp_store = MEMORY")
-        # Create temporary tables and insert data
+        subqueries = []
+        all_args = []
         for i, words in enumerate(word_groups):
-            cursor.execute(
-                f"CREATE TEMPORARY TABLE temp_grp{i} AS SELECT {philo_object}, philo_ids FROM words WHERE word IN ({', '.join(['?']*len(words))})",
-                words,
-            )
+            placeholders = ", ".join("?" * len(words))
+            subquery = f"(SELECT {philo_object}, philo_ids, rowid FROM words WHERE word IN ({placeholders})) AS grp{i}"
+            subqueries.append(subquery)
+            all_args.extend(words)
 
-        # Construct the join query using temporary tables
         join_conditions = " AND ".join(
-            f"temp_grp0.{philo_object} = temp_grp{i}.{philo_object}" for i in range(1, len(word_groups))
+            f"grp0.{philo_object} = grp{i}.{philo_object}" for i in range(1, len(word_groups))
         )
-        query = f"SELECT temp_grp0.{philo_object}, {', '.join(f'temp_grp{i}.philo_ids AS philo_ids{i}' for i in range(len(word_groups)))} FROM {' INNER JOIN '.join(f'temp_grp{i}' for i in range(len(word_groups)))} ON {join_conditions} ORDER BY temp_grp0.rowid"
 
-        cursor.execute(query)
+        # Construct the main query
+        query = f"SELECT {', '.join(f'grp{i}.philo_ids AS philo_ids{i}' for i in range(len(word_groups)))} FROM {' INNER JOIN '.join(subqueries)} ON {join_conditions} ORDER BY grp0.rowid"
+
+        cursor.execute(query, all_args)
+
+        # with sqlite3.connect(f"{db_path}/words.db") as conn:
+        #     cursor = conn.cursor()
+        #     cursor.execute("PRAGMA temp_store = MEMORY")
+
+        #     # Create temporary tables and insert data
+        #     for i, words in enumerate(word_groups):
+        #         cursor.execute(
+        #             f"CREATE TEMPORARY TABLE temp_grp{i} AS SELECT {philo_object}, philo_ids FROM words WHERE word IN ({', '.join(['?']*len(words))})",
+        #             words,
+        #         )
+
+        #     # Construct the join query using temporary tables
+        #     join_conditions = " AND ".join(
+        #         f"temp_grp0.{philo_object} = temp_grp{i}.{philo_object}" for i in range(1, len(word_groups))
+        #     )
+        #     query = f"SELECT temp_grp0.{philo_object}, {', '.join(f'temp_grp{i}.philo_ids AS philo_ids{i}' for i in range(len(word_groups)))} FROM {' INNER JOIN '.join(f'temp_grp{i}' for i in range(len(word_groups)))} ON {join_conditions} ORDER BY temp_grp0.rowid"
+
+        #     cursor.execute(query)
+
+        # with sqlite3.connect(f"{db_path}/words.db") as conn:
+        #     cursor = conn.cursor()
+        #     cursor.execute("PRAGMA temp_store = MEMORY")
+
+        #     # Create a temporary table only for the first word group
+        #     first_group_words = word_groups[0]
+        #     cursor.execute(
+        #         f"CREATE TEMPORARY TABLE temp_grp0 AS SELECT {philo_object}, philo_ids FROM words WHERE word IN ({', '.join(['?']*len(first_group_words))})",
+        #         first_group_words,
+        #     )
+
+        #     # Construct the join query between temp table and the other word groups
+        #     join_conditions = " AND ".join(
+        #         f"grp0.{philo_object} = grp{i}.{philo_object}" for i in range(1, len(word_groups))
+        #     )
+
+        #     # Construct the final query
+        #     inner_joins = f"(SELECT {philo_object}, philo_ids, rowid FROM temp_grp0) AS grp0 INNER JOIN "
+        #     inner_joins += " INNER JOIN ".join(
+        #         f"(SELECT {philo_object}, philo_ids FROM words WHERE word IN ({', '.join(['?']*len(words))})) AS grp{i}"
+        #         for i, words in enumerate(word_groups[1:], start=1)
+        #     )
+        #     query = f"SELECT grp0.{philo_object}, grp0.philo_ids, {', '.join(f'grp{i}.philo_ids' for i in range(1, len(word_groups)))} FROM {inner_joins} ON {join_conditions} ORDER BY grp0.rowid"
+        #     all_args = [word for words in word_groups[1:] for word in words]
+
+        #     # Execute the final query
+        #     cursor.execute(query, all_args)
 
         if corpus_philo_ids is None:
             for group in cursor:
@@ -243,10 +273,10 @@ def search_within_word_span(db_path, hitlist_filename, n, exact_phrase, corpus_f
         comp = eq  # distance between words equals n
     else:
         comp = le  # distance between words is less than or equal to n
-    buffer_size = (36 + 8 * (len(word_groups) - 1)) * 25  # we start writing after 25 hits
+    buffer_size = 36 + 8 * len(word_groups) * 25  # we start writing after 25 hits
     with open(hitlist_filename, "wb", buffering=buffer_size) as output_file:
         for group in common_object_ids:
-            philo_id_groups = (generate_philo_ids(group[i]) for i in range(1, len(group)))
+            philo_id_groups = (generate_philo_ids(group[i]) for i in range(len(group)))
             for group_combination in product(*philo_id_groups):
                 # we now need to check if the positions are within n words of each other
                 positions: list[int] = [struct.unpack("1i", philo_id[28:32])[0] for philo_id in group_combination]
@@ -267,11 +297,11 @@ def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None
     common_object_ids = get_cooccurrence_groups(
         db_path, word_groups, level=level, corpus_philo_ids=corpus_philo_ids, object_level=object_level
     )
-    buffer_size = (36 + 8 * (len(word_groups) - 1)) * 25  # we start writing after 25 hits
+    buffer_size = 36 + 8 * len(word_groups) * 25  # we start writing after 25 hits
     with open(hitlist_filename, "wb", buffering=buffer_size) as output_file:
         for group in common_object_ids:
-            starting_id = group[1][:36]
-            for philo_ids in group[2:]:
+            starting_id = group[0][:36]
+            for philo_ids in group[1:]:
                 for i in range(0, len(philo_ids), 36):
                     starting_id += philo_ids[i + 28 : i + 32] + philo_ids[i + 32 : i + 36]
                     break  # we only keep one philo_id per group: we are replicating the limitation of the old core
