@@ -14,6 +14,7 @@ import signal
 from operator import le, eq
 
 from typing import Iterator
+import lmdb
 
 import regex as re
 from philologic.runtime import HitList
@@ -43,6 +44,7 @@ def query(
 ):
     """Runs concordance queries"""
     sys.stdout.flush()
+    print("HOHOH", file=sys.stderr)
     parsed = parse_query(terms)
     grouped = group_terms(parsed)
     split = split_terms(grouped)
@@ -54,10 +56,14 @@ def query(
     if not os.path.exists(filename):
         Path(filename).touch()
     frequency_file = db.path + "/frequencies/normalized_word_frequencies"
-    # Handle SIGCHLD to avoid zombie processes
-    signal.signal(signal.SIGCHLD, signal.SIG_IGN)
     pid = os.fork()
     if pid == 0:  # In child process
+        os.umask(0)
+        os.chdir(dir)
+        os.setsid()
+        pid = os.fork()
+        if pid > 0:
+            os._exit(0)
         with open(f"{filename}.terms", "w") as terms_file:
             expand_query_not(split, frequency_file, terms_file, True, False)
         args = [
@@ -72,10 +78,12 @@ def query(
         if corpus_file is not None:
             args.append(f"--corpus_file={corpus_file}")
         print(" ".join(args), file=sys.stderr)
-        subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=os.environ)
+        subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ)
+        # std_out, std_err = worker.communicate()
+
         os._exit(0)  # Exit child process
     else:
-        return HitList.HitList(
+        hits = HitList.HitList(
             filename,
             words_per_hit,
             db,
@@ -84,6 +92,7 @@ def query(
             raw=raw_results,
             ascii_conversion=ascii_conversion,
         )
+        return hits
 
 
 def get_expanded_query(hitlist):
@@ -143,80 +152,55 @@ def get_cooccurrence_groups(
 ) -> Iterator[tuple[bytes]]:
     if level == "sent":
         philo_object = "philo_sent_id"
+        byte_length = 24
     elif level == "para":
         philo_object = "philo_para_id"
+        byte_length = 20
+    philo_object_intersection = None
+    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
+    with env.begin() as txn:
+        cursor = txn.cursor()
+        for group in word_groups:
+            group_set = set()
+            for word in group:
+                if cursor.set_key(word.encode("utf8")):
+                    philo_ids = cursor.value()
+                    if group_set:
+                        group_set.update((philo_ids[i : i + byte_length] for i in range(0, len(philo_ids), 36)))
+                    else:
+                        group_set = {philo_ids[i : i + byte_length] for i in range(0, len(philo_ids), 36)}
+            if philo_object_intersection is None:
+                philo_object_intersection = group_set
+            else:
+                philo_object_intersection.intersection_update(group_set)
+    env.close()
+
+    length = byte_length // 4
+
+    def sort_by_philo_id(philo_id):
+        return struct.unpack(f"{length}i", philo_id[:byte_length])
+
+    philo_object_intersection = tuple(sorted(philo_object_intersection, key=sort_by_philo_id))
     with sqlite3.connect(f"{db_path}/words.db") as conn:
-        cursor = conn.cursor()
-        subqueries = []
-        all_args = []
-        for i, words in enumerate(word_groups):
-            placeholders = ", ".join("?" * len(words))
-            subquery = f"(SELECT {philo_object}, philo_ids, rowid FROM words WHERE word IN ({placeholders})) AS grp{i}"
-            subqueries.append(subquery)
-            all_args.extend(words)
-
-        join_conditions = " AND ".join(
-            f"grp0.{philo_object} = grp{i}.{philo_object}" for i in range(1, len(word_groups))
-        )
-
-        # Construct the main query
-        query = f"SELECT {', '.join(f'grp{i}.philo_ids AS philo_ids{i}' for i in range(len(word_groups)))} FROM {' INNER JOIN '.join(subqueries)} ON {join_conditions} ORDER BY grp0.rowid"
-
-        cursor.execute(query, all_args)
-
-        # with sqlite3.connect(f"{db_path}/words.db") as conn:
-        #     cursor = conn.cursor()
-        #     cursor.execute("PRAGMA temp_store = MEMORY")
-
-        #     # Create temporary tables and insert data
-        #     for i, words in enumerate(word_groups):
-        #         cursor.execute(
-        #             f"CREATE TEMPORARY TABLE temp_grp{i} AS SELECT {philo_object}, philo_ids FROM words WHERE word IN ({', '.join(['?']*len(words))})",
-        #             words,
-        #         )
-
-        #     # Construct the join query using temporary tables
-        #     join_conditions = " AND ".join(
-        #         f"temp_grp0.{philo_object} = temp_grp{i}.{philo_object}" for i in range(1, len(word_groups))
-        #     )
-        #     query = f"SELECT temp_grp0.{philo_object}, {', '.join(f'temp_grp{i}.philo_ids AS philo_ids{i}' for i in range(len(word_groups)))} FROM {' INNER JOIN '.join(f'temp_grp{i}' for i in range(len(word_groups)))} ON {join_conditions} ORDER BY temp_grp0.rowid"
-
-        #     cursor.execute(query)
-
-        # with sqlite3.connect(f"{db_path}/words.db") as conn:
-        #     cursor = conn.cursor()
-        #     cursor.execute("PRAGMA temp_store = MEMORY")
-
-        #     # Create a temporary table only for the first word group
-        #     first_group_words = word_groups[0]
-        #     cursor.execute(
-        #         f"CREATE TEMPORARY TABLE temp_grp0 AS SELECT {philo_object}, philo_ids FROM words WHERE word IN ({', '.join(['?']*len(first_group_words))})",
-        #         first_group_words,
-        #     )
-
-        #     # Construct the join query between temp table and the other word groups
-        #     join_conditions = " AND ".join(
-        #         f"grp0.{philo_object} = grp{i}.{philo_object}" for i in range(1, len(word_groups))
-        #     )
-
-        #     # Construct the final query
-        #     inner_joins = f"(SELECT {philo_object}, philo_ids, rowid FROM temp_grp0) AS grp0 INNER JOIN "
-        #     inner_joins += " INNER JOIN ".join(
-        #         f"(SELECT {philo_object}, philo_ids FROM words WHERE word IN ({', '.join(['?']*len(words))})) AS grp{i}"
-        #         for i, words in enumerate(word_groups[1:], start=1)
-        #     )
-        #     query = f"SELECT grp0.{philo_object}, grp0.philo_ids, {', '.join(f'grp{i}.philo_ids' for i in range(1, len(word_groups)))} FROM {inner_joins} ON {join_conditions} ORDER BY grp0.rowid"
-        #     all_args = [word for words in word_groups[1:] for word in words]
-
-        #     # Execute the final query
-        #     cursor.execute(query, all_args)
-
+        cursors = [conn.cursor() for _ in word_groups]
+        placeholders_ids = ",".join(["?"] * len(philo_object_intersection))
+        results = []
+        for i, word_group in enumerate(word_groups):
+            cursors[i].execute(
+                f"SELECT {philo_object}, philo_ids FROM words WHERE {philo_object} IN ({placeholders_ids}) and word IN ({','.join(['?'] * len(word_group))})",
+                philo_object_intersection + tuple(word_group),
+            )
+            results.append(dict(cursors[i]))
         if corpus_philo_ids is None:
-            for group in cursor:
-                yield group
+            for philo_object in philo_object_intersection:
+                yield tuple(results[i][philo_object] for i in range(len(word_groups)))
+            # for group in zip(*cursors): # TODO: implement a mechanism to sort by by philo_id in SQLite
+            # yield tuple(g[0] for g in group)
         else:
-            for group in cursor:
-                philo_ids = group[1]
+            # for group in zip(*cursors):
+            for philo_object in philo_object_intersection:
+                group = tuple(results[i][philo_object] for i in range(len(word_groups)))
+                philo_ids = group[0]
                 found = False
                 for start_byte in range(0, len(philo_ids), 36):
                     philo_id = philo_ids[start_byte : start_byte + 36]
@@ -231,25 +215,46 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
     """Search for a single word in the database."""
     with open(f"{hitlist_filename}.terms", "r") as terms_file:
         words = terms_file.read().split()
-    if corpus_file is None:
-        # We start writing after 25 hits
-        with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb", buffering=900) as output_file:
-            cursor = conn.cursor()
-            cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
-            for (philo_ids,) in cursor:
-                output_file.write(philo_ids)
+    if len(words) == 1:  # use LMDB for single word queries
+        if corpus_file is None:
+            env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
+            with env.begin() as txn, open(hitlist_filename, "wb", buffering=900) as output_file:
+                cursor = txn.cursor()
+                if cursor.set_key(words[0].encode("utf8")):
+                    output_file.write(cursor.value())
+        else:
+            corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
+            with env.begin() as txn, open(hitlist_filename, "wb", buffering=900) as output_file:
+                cursor = txn.cursor()
+                if cursor.set_key(words[0].encode("utf8")):
+                    value = cursor.value()
+                    for start_byte in range(0, len(value), 36):
+                        philo_id = value[start_byte : start_byte + 36]
+                        if philo_id[:object_level] in corpus_philo_ids:
+                            output_file.write(philo_id)
+                            break
     else:
-        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
-        # We now check if the words are in within the corpus philo_ids
-        with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb", buffering=900) as output_file:
-            cursor = conn.cursor()
-            cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
-            for (philo_ids,) in cursor:
-                for start_byte in range(0, len(philo_ids), 36):
-                    philo_id = philo_ids[start_byte : start_byte + 36]
-                    if philo_id[:object_level] in corpus_philo_ids:
-                        output_file.write(philo_id)
-                        break
+        if corpus_file is None:
+            with sqlite3.connect(f"{db_path}/words.db") as conn, open(
+                hitlist_filename, "wb", buffering=900
+            ) as output_file:
+                cursor = conn.cursor()
+                cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
+                for (philo_ids,) in cursor:
+                    output_file.write(philo_ids)
+        else:
+            corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
+            with sqlite3.connect(f"{db_path}/words.db") as conn, open(
+                hitlist_filename, "wb", buffering=900
+            ) as output_file:
+                cursor = conn.cursor()
+                cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
+                for (philo_ids,) in cursor:
+                    for start_byte in range(0, len(philo_ids), 36):
+                        philo_id = philo_ids[start_byte : start_byte + 36]
+                        if philo_id[:object_level] in corpus_philo_ids:
+                            output_file.write(philo_id)
+                            break
 
 
 def search_within_word_span(db_path, hitlist_filename, n, exact_phrase, corpus_file=None):

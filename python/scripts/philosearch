@@ -28,3 +28,4 @@ if __name__ == "__main__":
     # do something to mark query as finished
     with open(args.hitlist + ".done", "w") as flag:
         flag.write(" ".join(sys.argv) + "\n")
+        flag.flush()  # make sure the file is written to disk. We get an infinite loop otherwise with 0 hits otherwise

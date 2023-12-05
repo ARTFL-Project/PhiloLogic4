@@ -754,9 +754,45 @@ class Loader:
                     (word_to_store, local_sent_id, local_para_id, word_ids),
                 )
             cursor.execute("CREATE INDEX word_index ON words (word)")
-            cursor.execute("CREATE INDEX philo_sent_id_index ON words (word, philo_sent_id)")
-            cursor.execute("CREATE INDEX philo_para_id_index ON words (word, philo_para_id)")
+            cursor.execute("CREATE INDEX philo_sent_id_index ON words (philo_sent_id, word)")
+            cursor.execute("CREATE INDEX philo_para_id_index ON words (philo_para_id, word)")
+            cursor.execute("ANALYZE")
             conn.commit()
+
+        db_env = lmdb.open(f"{self.destination}/words.lmdb", map_size=1024 * 1024 * 1024 * 1024)
+        with lz4.frame.open(f"{self.workdir}/all_words_sorted.lz4") as input_file:
+            current_word = None
+            count = 0
+            current_word = None
+            current_sent_id = None
+            philo_ids = bytearray()
+            txn = db_env.begin(write=True)
+            for line in tqdm(input_file, total=line_count, desc="Storing words with sentence IDs in LMDB database"):
+                line = line.decode("utf-8")
+                _, word, philo_id, _ = line.split("\t", 3)
+                word_id = struct.pack("9i", *map(int, philo_id.split()))
+                if word != current_word:
+                    if current_word is not None:
+                        txn.put(
+                            current_word.encode("utf-8"),
+                            philo_ids,
+                        )
+                        count += 1
+                        if count % commit_interval == 0:
+                            txn.commit()
+                            txn = db_env.begin(write=True)
+                    current_word = word
+                    philo_ids.clear()
+                philo_ids.extend(word_id)
+
+            # Commit any remaining words
+            if philo_ids:
+                txn.put(
+                    current_word.encode("utf-8"),
+                    philo_ids,
+                )
+            txn.commit()
+        db_env.close()
         print("Finished creating inverted index.")
 
     def setup_sql_load(self, verbose=True):
