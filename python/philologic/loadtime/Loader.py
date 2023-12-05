@@ -770,7 +770,9 @@ class Loader:
             for line in tqdm(input_file, total=line_count, desc="Storing words with sentence IDs in LMDB database"):
                 line = line.decode("utf-8")
                 _, word, philo_id, _ = line.split("\t", 3)
-                word_id = struct.pack("9i", *map(int, philo_id.split()))
+                hit = list(map(int, philo_id.split()))
+                hit = hit[:6] + [hit[8]] + [hit[6], hit[7]]
+                word_id = struct.pack("9i", *hit)
                 if word != current_word:
                     if current_word is not None:
                         txn.put(

@@ -12,6 +12,8 @@ from pathlib import Path
 import time
 import signal
 from operator import le, eq
+import heapq
+
 
 from typing import Iterator
 import lmdb
@@ -165,10 +167,16 @@ def get_cooccurrence_groups(
             for word in group:
                 if cursor.set_key(word.encode("utf8")):
                     philo_ids = cursor.value()
-                    if group_set:
-                        group_set.update((philo_ids[i : i + byte_length] for i in range(0, len(philo_ids), 36)))
+                    if corpus_philo_ids is None:
+                        if group_set:
+                            group_set.update((philo_ids[i : i + byte_length] for i in range(0, len(philo_ids), 36)))
+                        else:
+                            group_set = {philo_ids[i : i + byte_length] for i in range(0, len(philo_ids), 36)}
                     else:
-                        group_set = {philo_ids[i : i + byte_length] for i in range(0, len(philo_ids), 36)}
+                        for start_byte in range(0, len(philo_ids), 36):
+                            if philo_ids[start_byte:object_level] in corpus_philo_ids:
+                                group_set.add(philo_ids[start_byte : start_byte + byte_length])
+                                break
             if philo_object_intersection is None:
                 philo_object_intersection = group_set
             else:
@@ -177,10 +185,7 @@ def get_cooccurrence_groups(
 
     length = byte_length // 4
 
-    def sort_by_philo_id(philo_id):
-        return struct.unpack(f"{length}i", philo_id[:byte_length])
-
-    philo_object_intersection = tuple(sorted(philo_object_intersection, key=sort_by_philo_id))
+    philo_object_intersection = tuple(sorted(philo_object_intersection, key=lambda x: struct.unpack(f"{length}i", x)))
     with sqlite3.connect(f"{db_path}/words.db") as conn:
         cursors = [conn.cursor() for _ in word_groups]
         placeholders_ids = ",".join(["?"] * len(philo_object_intersection))
@@ -191,24 +196,10 @@ def get_cooccurrence_groups(
                 philo_object_intersection + tuple(word_group),
             )
             results.append(dict(cursors[i]))
-        if corpus_philo_ids is None:
-            for philo_object in philo_object_intersection:
-                yield tuple(results[i][philo_object] for i in range(len(word_groups)))
-            # for group in zip(*cursors): # TODO: implement a mechanism to sort by by philo_id in SQLite
-            # yield tuple(g[0] for g in group)
-        else:
-            # for group in zip(*cursors):
-            for philo_object in philo_object_intersection:
-                group = tuple(results[i][philo_object] for i in range(len(word_groups)))
-                philo_ids = group[0]
-                found = False
-                for start_byte in range(0, len(philo_ids), 36):
-                    philo_id = philo_ids[start_byte : start_byte + 36]
-                    if philo_id[:object_level] in corpus_philo_ids:
-                        found = True
-                        break
-                if found is True:
-                    yield group
+        for philo_object in philo_object_intersection:
+            yield tuple(results[i][philo_object] for i in range(len(word_groups)))
+        # for group in zip(*cursors): # TODO: implement a mechanism to sort by by philo_id in SQLite
+        # yield tuple(g[0] for g in group)
 
 
 def search_word(db_path, hitlist_filename, corpus_file=None):
@@ -217,31 +208,43 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
         words = terms_file.read().split()
     if len(words) == 1:  # use LMDB for single word queries
         if corpus_file is None:
-            env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
-            with env.begin() as txn, open(hitlist_filename, "wb", buffering=900) as output_file:
-                cursor = txn.cursor()
-                if cursor.set_key(words[0].encode("utf8")):
-                    output_file.write(cursor.value())
+            env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False)
+            with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
+                output_file.write(txn.get(words[0].encode("utf8")))
         else:
             corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
-            with env.begin() as txn, open(hitlist_filename, "wb", buffering=900) as output_file:
+            with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
                 cursor = txn.cursor()
                 if cursor.set_key(words[0].encode("utf8")):
                     value = cursor.value()
-                    for start_byte in range(0, len(value), 36):
-                        philo_id = value[start_byte : start_byte + 36]
+                    for philo_id in extract_philo_ids(value, 36):
                         if philo_id[:object_level] in corpus_philo_ids:
                             output_file.write(philo_id)
                             break
     else:
-        if corpus_file is None:
-            with sqlite3.connect(f"{db_path}/words.db") as conn, open(
-                hitlist_filename, "wb", buffering=900
-            ) as output_file:
-                cursor = conn.cursor()
-                cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
-                for (philo_ids,) in cursor:
-                    output_file.write(philo_ids)
+        if corpus_file is None:  # TODO: Fix the fact that it is not word order sensitive
+            env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False)
+            with env.begin() as txn, open(hitlist_filename, "wb") as output_file:
+                pq = []  # Priority queue
+                byte_streams = {}
+                philo_id_length = 36  # Length of a full philo_id (9 integers * 4 bytes each)
+                cursor = txn.cursor()
+                for i, word in enumerate(words):
+                    if cursor.set_key(word.encode("utf8")):
+                        byte_stream = cursor.value()
+                        byte_streams[i] = byte_stream
+                        first_philo_id = byte_stream[:36]
+                        heapq.heappush(pq, (first_philo_id, i, 0))  # (philo_id, word_index, byte_index)
+
+                # Iterate and write sorted philo_ids
+                while pq:
+                    philo_id, word_index, byte_index = heapq.heappop(pq)
+                    output_file.write(philo_id)
+                    next_byte_index = byte_index + philo_id_length
+                    if next_byte_index < len(byte_streams[word_index]):
+                        next_philo_id = byte_streams[word_index][next_byte_index : next_byte_index + philo_id_length]
+                        heapq.heappush(pq, (next_philo_id, word_index, next_byte_index))
+
         else:
             corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
             with sqlite3.connect(f"{db_path}/words.db") as conn, open(
@@ -250,8 +253,7 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                 cursor = conn.cursor()
                 cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
                 for (philo_ids,) in cursor:
-                    for start_byte in range(0, len(philo_ids), 36):
-                        philo_id = philo_ids[start_byte : start_byte + 36]
+                    for philo_id in extract_philo_ids(philo_ids, 36):
                         if philo_id[:object_level] in corpus_philo_ids:
                             output_file.write(philo_id)
                             break
@@ -313,6 +315,12 @@ def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None
             output_file.write(starting_id)
 
 
+def extract_philo_ids(philo_ids: bytes, byte_length):
+    """Generator that yields 36-byte long philo_ids from the byte sequence"""
+    for start_byte in range(0, len(philo_ids), byte_length):
+        yield philo_ids[start_byte : start_byte + byte_length]
+
+
 def get_corpus_philo_ids(corpus_file):
     corpus_philo_ids = set()
     object_level = 0
@@ -322,7 +330,6 @@ def get_corpus_philo_ids(corpus_file):
         while buffer:
             philo_id = tuple(i for i in struct.unpack("7i", buffer) if i)
             corpus_philo_ids.add(struct.pack(f"{len(philo_id)}i", *philo_id))
-            corpus_philo_ids.add(philo_id)
             buffer = corpus.read(28)
     return corpus_philo_ids, object_level
 
