@@ -193,7 +193,7 @@ def get_cooccurrence_groups(
 
     env.close()
 
-    for philo_object_id in sorted(philo_object_intersection):
+    for philo_object_id in sorted(philo_object_intersection, key=lambda x: struct.unpack(f"{byte_length//4}i", x)):
         yield tuple(group_dict[philo_object_id] for group_dict in group_dicts)
 
 
