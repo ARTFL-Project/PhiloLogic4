@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from philologic.runtime.Query import search_within_text_object, search_within_word_span, search_word
+from philologic.runtime.Query import search_within_text_object, search_within_word_span, search_word, search_phrase
 import sys
 
 
@@ -12,8 +12,10 @@ def parse_args():
     parser.add_argument("--corpus_file", help="Path to the file containing the corpus", default=None)
     parser.add_argument("--n", help="Maximum distance between words", type=int)
     parser.add_argument("--level", help="Level of the search", choices=["sent", "para"], default="sent")
-    parser.add_argument("--search_type", help="Type of search", choices=["proxy", "phrase", "cooc"], default="proxy")
-    parser.add_argument("--exact", help="Whether to search for an exact phrase", choices=[0, 1], type=int)
+    parser.add_argument(
+        "--search_type", help="Type of search", choices=["proxy", "phrase", "exact_phrase", "cooc"], default="proxy"
+    )
+    parser.add_argument("--exact_span", help="Whether to search for an exact phrase", choices=[0, 1], type=int)
     return parser.parse_args()
 
 
@@ -21,11 +23,13 @@ if __name__ == "__main__":
     args = parse_args()
     if args.search_type == "proxy":
         search_word(args.db_path, args.hitlist, corpus_file=args.corpus_file)
-    elif args.search_type == "phrase":
-        search_within_word_span(args.db_path, args.hitlist, args.n, bool(args.exact), corpus_file=args.corpus_file)
+    elif args.search_type == "exact_phrase":
+        search_phrase(args.db_path, args.hitlist, corpus_file=args.corpus_file)
     elif args.search_type == "cooc":
         search_within_text_object(args.db_path, args.hitlist, args.level, corpus_file=args.corpus_file)
+    elif args.search_type == "phrase":
+        search_within_word_span(args.db_path, args.hitlist, args.n, bool(args.exact_span), corpus_file=args.corpus_file)
     # do something to mark query as finished
     with open(args.hitlist + ".done", "w") as flag:
         flag.write(" ".join(sys.argv) + "\n")
-        flag.flush()  # make sure the file is written to disk. We get an infinite loop otherwise with 0 hits otherwise
+        flag.flush()  # make sure the file is written to disk. Otherwise we get an infinite loop  with 0 hits otherwise

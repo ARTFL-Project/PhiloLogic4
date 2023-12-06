@@ -123,15 +123,20 @@ class DB:
                 else:
                     method_arg = 0
         exact = 1
-        words = [w for w in qs.split() if w]
-        if qs and method in ("proxy", ""):
+        if qs.startswith('"') and qs.endswith('"'):
+            method = "exact_phrase"
+            unquoted = qs[1:-1]
+            qs = " ".join(f'"{word}"' for word in unquoted.split())
+        else:
+            words = [w for w in qs.split() if w]
+            if qs and method in ("proxy", ""):
+                if len(words) == 1:
+                    method = "proxy"
+                else:
+                    method = "phrase"
+                    exact = 0
             if len(words) == 1:
                 method = "proxy"
-            else:
-                method = "phrase"
-                exact = 0  # we don't want to do exact matching for phrases (nonsense)
-        if len(words) == 1:
-            method = "proxy"
 
         if isinstance(limit, str):
             try:

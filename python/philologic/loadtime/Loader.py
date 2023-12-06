@@ -767,7 +767,7 @@ class Loader:
             current_sent_id = None
             philo_ids = bytearray()
             txn = db_env.begin(write=True)
-            for line in tqdm(input_file, total=line_count, desc="Storing words with sentence IDs in LMDB database"):
+            for line in tqdm(input_file, total=line_count, desc="Storing words in LMDB database"):
                 line = line.decode("utf-8")
                 _, word, philo_id, _ = line.split("\t", 3)
                 hit = list(map(int, philo_id.split()))

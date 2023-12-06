@@ -7,7 +7,7 @@ import sys
 import multiprocessing
 import sqlite3
 import struct
-from itertools import product
+from itertools import product, zip_longest
 from pathlib import Path
 import time
 import signal
@@ -75,7 +75,7 @@ def query(
             f"--search_type={method}",
             f"--level={object_level}",
             f"--n={method_arg or 1}",
-            f"--exact={exact}",
+            f"--exact_span={exact}",
         ]
         if corpus_file is not None:
             args.append(f"--corpus_file={corpus_file}")
@@ -160,46 +160,41 @@ def get_cooccurrence_groups(
         byte_length = 20
     philo_object_intersection = None
     env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
+    start = time.time()
+    group_dicts = []
+    group_philo_ids = {}
     with env.begin() as txn:
         cursor = txn.cursor()
-        for group in word_groups:
-            group_set = set()
+        for group_num, group in enumerate(word_groups):
+            group_dict = {}
             for word in group:
                 if cursor.set_key(word.encode("utf8")):
                     philo_ids = cursor.value()
                     if corpus_philo_ids is None:
-                        if group_set:
-                            group_set.update((philo_ids[i : i + byte_length] for i in range(0, len(philo_ids), 36)))
-                        else:
-                            group_set = {philo_ids[i : i + byte_length] for i in range(0, len(philo_ids), 36)}
+                        for i in range(0, len(philo_ids), 36):
+                            philo_object = philo_ids[i : i + byte_length]
+                            if philo_object not in group_dict:
+                                group_dict[philo_object] = philo_ids[i : i + 36]
+                            else:
+                                group_dict[philo_object] += philo_ids[i : i + 36]
                     else:
-                        for start_byte in range(0, len(philo_ids), 36):
-                            if philo_ids[start_byte:object_level] in corpus_philo_ids:
-                                group_set.add(philo_ids[start_byte : start_byte + byte_length])
-                                break
+                        for i in range(0, len(philo_ids), 36):
+                            philo_object = philo_ids[i : i + byte_length]
+                            if philo_object[:object_level] in corpus_philo_ids:
+                                if philo_object not in group_dict:
+                                    group_dict[philo_object] = philo_ids[i : i + 36]
+                                else:
+                                    group_dict[philo_object] += philo_ids[i : i + 36]
+            group_dicts.append(group_dict)
             if philo_object_intersection is None:
-                philo_object_intersection = group_set
+                philo_object_intersection = set(group_dict)
             else:
-                philo_object_intersection.intersection_update(group_set)
+                philo_object_intersection.intersection_update(set(group_dict))
+
     env.close()
 
-    length = byte_length // 4
-
-    philo_object_intersection = tuple(sorted(philo_object_intersection, key=lambda x: struct.unpack(f"{length}i", x)))
-    with sqlite3.connect(f"{db_path}/words.db") as conn:
-        cursors = [conn.cursor() for _ in word_groups]
-        placeholders_ids = ",".join(["?"] * len(philo_object_intersection))
-        results = []
-        for i, word_group in enumerate(word_groups):
-            cursors[i].execute(
-                f"SELECT {philo_object}, philo_ids FROM words WHERE {philo_object} IN ({placeholders_ids}) and word IN ({','.join(['?'] * len(word_group))})",
-                philo_object_intersection + tuple(word_group),
-            )
-            results.append(dict(cursors[i]))
-        for philo_object in philo_object_intersection:
-            yield tuple(results[i][philo_object] for i in range(len(word_groups)))
-        # for group in zip(*cursors): # TODO: implement a mechanism to sort by by philo_id in SQLite
-        # yield tuple(g[0] for g in group)
+    for philo_object_id in sorted(philo_object_intersection):
+        yield tuple(group_dict[philo_object_id] for group_dict in group_dicts)
 
 
 def search_word(db_path, hitlist_filename, corpus_file=None):
@@ -222,7 +217,7 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                             output_file.write(philo_id)
                             break
     else:
-        if corpus_file is None:  # TODO: Fix the fact that it is not word order sensitive
+        if corpus_file is None:
             env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False)
             with env.begin() as txn, open(hitlist_filename, "wb") as output_file:
                 pq = []  # Priority queue
@@ -259,7 +254,58 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                             break
 
 
-def search_within_word_span(db_path, hitlist_filename, n, exact_phrase, corpus_file=None):
+def search_phrase(db_path, hitlist_filename, corpus_file=None):
+    """Phrase searches where words need to be in a specific order"""
+    with open(f"{hitlist_filename}.terms", "r") as terms_file:
+        words = terms_file.read().split()
+    if corpus_file is None:
+        env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False)
+        with env.begin() as txn, open(hitlist_filename, "wb") as output_file:
+            results = []
+            byte_streams = {}
+            philo_id_length = 36  # Length of a full philo_id (9 integers * 4 bytes each)
+            cursor = txn.cursor()
+            for i, word in enumerate(words):
+                if cursor.set_key(word.encode("utf8")):
+                    philo_ids = cursor.value()
+                    results.append(((philo_ids[i : i + 36], philo_ids[i:24]) for i in range(0, len(philo_ids), 36)))
+
+            # Iterate over both byte streams and write when they are within one word of each other
+            # for philo_id_tuples in zip(*results):
+
+            # byte_stream = cursor.value()
+            # byte_streams[i] = byte_stream
+            # first_philo_id = byte_stream[:36]
+            # heapq.heappush(pq, (first_philo_id, i, 0))  # (philo_id, word_index, byte_index)
+
+            # # Iterate and write sorted philo_ids
+            # while pq:
+            #     philo_id, word_index, byte_index = heapq.heappop(pq)
+            #     if word_index == len(words) - 1:
+            #         if word_index == 0:
+            #             output_file.write(philo_id)
+            #         else:
+            #             output_file.write(philo_id[28:])
+            #     else:
+            #         next_byte_index = byte_index + philo_id_length
+            #         if next_byte_index < len(byte_streams[word_index]):
+            #             next_philo_id = byte_streams[word_index][next_byte_index : next_byte_index + philo_id_length]
+            #             heapq.heappush(pq, (next_philo_id, word_index + 1, next_byte_index))
+    else:
+        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
+        with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb", buffering=900) as output_file:
+            cursor = conn.cursor()
+            cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
+            for (philo_ids,) in cursor:
+                philo_ids = extract_philo_ids(philo_ids, 36)
+                for i, philo_id in enumerate(philo_ids):
+                    if i == len(philo_ids) - 1:
+                        output_file.write(philo_id)
+                    else:
+                        next_philo_id = philo_ids[i]
+
+
+def search_within_word_span(db_path, hitlist_filename, n, exact_distance, corpus_file=None):
     """Search for co-occurrences of multiple words within n words of each other in the database."""
     word_groups = get_word_groups(f"{hitlist_filename}.terms")
     object_level = None
@@ -276,7 +322,7 @@ def search_within_word_span(db_path, hitlist_filename, n, exact_phrase, corpus_f
         for i in range(0, len(byte_sequence), 36):
             yield byte_sequence[i : i + 36]
 
-    if exact_phrase is True:
+    if exact_distance is True:
         comp = eq  # distance between words equals n
     else:
         comp = le  # distance between words is less than or equal to n
