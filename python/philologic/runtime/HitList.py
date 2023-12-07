@@ -47,7 +47,7 @@ class HitList(object):
                 break
             time.sleep(0.005)
         self.fh = open(self.filename, "rb")  # need a full path here.
-        self.format = "=%dI" % self.length  # short for object id's, int for byte offset.
+        self.format = ">%dI" % self.length  # short for object id's, int for byte offset.
         self.hitsize = struct.calcsize(self.format)
         self.doc = doc
         self.byte = byte

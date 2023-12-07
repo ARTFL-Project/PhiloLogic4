@@ -25,7 +25,7 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False, asc
         corpus_fh = open(filename, "wb")
         for corpus_obj in query:
             obj_id = [int(x) for x in corpus_obj["philo_id"].split(" ")]
-            corpus_fh.write(struct.pack("=7i", *obj_id))
+            corpus_fh.write(struct.pack(">7I", *obj_id))
         corpus_fh.close()
     except Exception as e:
         print(str(e), file=sys.stderr)

@@ -718,8 +718,8 @@ class Loader:
                 if sent_id != current_sent_id:
                     words_per_object_id[current_word] = philo_ids  # add last word from previous object_id
                     if current_sent_id is not None:
-                        local_sent_id = struct.pack("6i", *map(int, current_sent_id.split()))
-                        local_para_id = struct.pack("5i", *map(int, current_para_id.split()))
+                        local_sent_id = struct.pack(">6I", *map(int, current_sent_id.split()))
+                        local_para_id = struct.pack(">5I", *map(int, current_para_id.split()))
                         for word_to_store, word_ids in words_per_object_id.items():
                             cursor.execute(
                                 "INSERT INTO words (word, philo_sent_id, philo_para_id, philo_ids) VALUES (?, ?, ?, ?)",
@@ -740,15 +740,15 @@ class Loader:
 
                 hit = list(map(int, philo_id.split()))
                 hit = hit[:6] + [hit[8]] + [hit[6], hit[7]]
-                packed_philo_id = struct.pack("9i", *hit)
+                packed_philo_id = struct.pack(">9I", *hit)
                 philo_ids.extend(packed_philo_id)
 
             # Handle the last set of words
             if philo_ids:
                 words_per_object_id[current_word] = philo_ids
             for word_to_store, word_ids in words_per_object_id.items():
-                local_sent_id = struct.pack("6i", *map(int, current_sent_id.split()))
-                local_para_id = struct.pack("5i", *map(int, current_para_id.split()))
+                local_sent_id = struct.pack(">6I", *map(int, current_sent_id.split()))
+                local_para_id = struct.pack(">5I", *map(int, current_para_id.split()))
                 cursor.execute(
                     "INSERT INTO words (word, philo_sent_id, philo_para_id, philo_ids) VALUES (?, ?, ?, ?)",
                     (word_to_store, local_sent_id, local_para_id, word_ids),
@@ -772,7 +772,7 @@ class Loader:
                 _, word, philo_id, _ = line.split("\t", 3)
                 hit = list(map(int, philo_id.split()))
                 hit = hit[:6] + [hit[8]] + [hit[6], hit[7]]
-                word_id = struct.pack("9i", *hit)
+                word_id = struct.pack(">9I", *hit)
                 if word != current_word:
                     if current_word is not None:
                         txn.put(
