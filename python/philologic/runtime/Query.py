@@ -134,77 +134,6 @@ def split_terms(grouped):
     return split
 
 
-def get_word_groups(terms_file):
-    word_groups = []
-    with open(terms_file, "r") as terms_file:
-        word_group = []
-        for line in terms_file:
-            word = line.strip()
-            if word:
-                word_group.append(word)
-            elif word_group:
-                word_groups.append(word_group)
-                word_group = []
-        if word_group:
-            word_groups.append(word_group)
-    return word_groups
-
-
-def get_cooccurrence_groups(
-    db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None
-) -> Iterator[tuple[bytes]]:
-    if level == "sent":
-        philo_object = "philo_sent_id"
-        byte_length = 24
-    elif level == "para":
-        philo_object = "philo_para_id"
-        byte_length = 20
-    philo_object_intersection = None
-    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
-    start = time.time()
-    group_dicts = []
-    group_philo_ids = {}
-    with env.begin() as txn:
-        cursor = txn.cursor()
-        for group_num, group in enumerate(word_groups):
-            group_dict = {}
-            for word in group:
-                if cursor.set_key(word.encode("utf8")):
-                    philo_ids = cursor.value()
-                    if corpus_philo_ids is None:
-                        for i in range(0, len(philo_ids), 36):
-                            philo_object = philo_ids[i : i + byte_length]
-                            if philo_object not in group_dict:
-                                group_dict[philo_object] = philo_ids[i : i + 36]
-                            else:
-                                group_dict[philo_object] += philo_ids[i : i + 36]
-                    else:
-                        for i in range(0, len(philo_ids), 36):
-                            philo_object = philo_ids[i : i + byte_length]
-                            if philo_object[:object_level] in corpus_philo_ids:
-                                if philo_object not in group_dict:
-                                    group_dict[philo_object] = philo_ids[i : i + 36]
-                                else:
-                                    group_dict[philo_object] += philo_ids[i : i + 36]
-            group_dicts.append(group_dict)
-            if philo_object_intersection is None:
-                philo_object_intersection = set(group_dict)
-            else:
-                philo_object_intersection.intersection_update(set(group_dict))
-
-    env.close()
-
-    def isorted(iterable):  # Lazy sort to return results as quickly as they are sorted
-        lst = list(iterable)
-        heapq.heapify(lst)
-        pop = heapq.heappop
-        while lst:
-            yield pop(lst)
-
-    for philo_object_id in isorted(philo_object_intersection):
-        yield tuple(group_dict[philo_object_id] for group_dict in group_dicts)
-
-
 def search_word(db_path, hitlist_filename, corpus_file=None):
     """Search for a single word in the database."""
     with open(f"{hitlist_filename}.terms", "r") as terms_file:
@@ -330,8 +259,7 @@ def search_within_word_span(db_path, hitlist_filename, n, exact_distance, corpus
         comp = eq  # distance between words equals n
     else:
         comp = le  # distance between words is less than or equal to n
-    buffer_size = 36 + 8 * len(word_groups) * 25  # we start writing after 25 hits
-    with open(hitlist_filename, "wb", buffering=buffer_size) as output_file:
+    with open(hitlist_filename, "wb") as output_file:
         for group in common_object_ids:
             philo_id_groups = (generate_philo_ids(group[i]) for i in range(len(group)))
             for group_combination in product(*philo_id_groups):
@@ -354,8 +282,7 @@ def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None
     common_object_ids = get_cooccurrence_groups(
         db_path, word_groups, level=level, corpus_philo_ids=corpus_philo_ids, object_level=object_level
     )
-    buffer_size = 36 + 8 * len(word_groups) * 25  # we start writing after 25 hits
-    with open(hitlist_filename, "wb", buffering=buffer_size) as output_file:
+    with open(hitlist_filename, "wb") as output_file:
         for group in common_object_ids:
             starting_id = group[0][:36]
             for philo_ids in group[1:]:
@@ -363,6 +290,77 @@ def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None
                     starting_id += philo_ids[i + 28 : i + 32] + philo_ids[i + 32 : i + 36]
                     break  # we only keep one philo_id per group: we are replicating the limitation of the old core
             output_file.write(starting_id)
+
+
+def get_word_groups(terms_file):
+    word_groups = []
+    with open(terms_file, "r") as terms_file:
+        word_group = []
+        for line in terms_file:
+            word = line.strip()
+            if word:
+                word_group.append(word)
+            elif word_group:
+                word_groups.append(word_group)
+                word_group = []
+        if word_group:
+            word_groups.append(word_group)
+    return word_groups
+
+
+def get_cooccurrence_groups(
+    db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None
+) -> Iterator[tuple[bytes]]:
+    if level == "sent":
+        philo_object = "philo_sent_id"
+        byte_length = 24
+    elif level == "para":
+        philo_object = "philo_para_id"
+        byte_length = 20
+    philo_object_intersection = None
+    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
+    start = time.time()
+    group_dicts = []
+    group_philo_ids = {}
+    with env.begin() as txn:
+        cursor = txn.cursor()
+        for group_num, group in enumerate(word_groups):
+            group_dict = {}
+            for word in group:
+                if cursor.set_key(word.encode("utf8")):
+                    philo_ids = cursor.value()
+                    if corpus_philo_ids is None:
+                        for i in range(0, len(philo_ids), 36):
+                            philo_object = philo_ids[i : i + byte_length]
+                            if philo_object not in group_dict:
+                                group_dict[philo_object] = philo_ids[i : i + 36]
+                            else:
+                                group_dict[philo_object] += philo_ids[i : i + 36]
+                    else:
+                        for i in range(0, len(philo_ids), 36):
+                            philo_object = philo_ids[i : i + byte_length]
+                            if philo_object[:object_level] in corpus_philo_ids:
+                                if philo_object not in group_dict:
+                                    group_dict[philo_object] = philo_ids[i : i + 36]
+                                else:
+                                    group_dict[philo_object] += philo_ids[i : i + 36]
+            group_dicts.append(group_dict)
+            if philo_object_intersection is None:
+                philo_object_intersection = set(group_dict)
+            else:
+                philo_object_intersection.intersection_update(set(group_dict))
+
+    env.close()
+
+    def isorted(iterable):  # Lazy sort to return results as quickly as they are sorted
+        lst = list(iterable)
+        heapq.heapify(lst)
+        pop = heapq.heappop
+        while lst:
+            yield pop(lst)
+
+    for philo_object_id in isorted(philo_object_intersection):
+        yield tuple(group_dict[philo_object_id] for group_dict in group_dicts)
 
 
 def extract_philo_ids(philo_ids: bytes, byte_length):
