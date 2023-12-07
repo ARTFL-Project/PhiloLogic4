@@ -41,7 +41,7 @@ def aggregation_by_field(request, config):
             if citation["field"] in db.locals["metadata_fields"]:
                 metadata_fields_needed.add(citation["field"])
 
-    hits.finish()
+    # hits.finish()
     philo_ids = __expand_hits(hits, metadata_type)
     cursor = db.dbh.cursor()
     # if metadata_type != "div":

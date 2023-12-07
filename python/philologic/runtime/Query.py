@@ -211,9 +211,9 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
         words = terms_file.read().split()
     if corpus_file is not None:
         corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
-    if len(words) == 1:  # use LMDB for single word queries
+    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False)
+    if len(words) == 1:  #
         if corpus_file is None:
-            env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False)
             with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
                 output_file.write(txn.get(words[0].encode("utf8")))
         else:
@@ -225,9 +225,7 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                     for philo_id in extract_philo_ids(value, 36):
                         if philo_id[:object_level] in corpus_philo_ids:
                             output_file.write(philo_id)
-                            break
     else:
-        env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False)
         with env.begin() as txn, open(hitlist_filename, "wb") as output_file:
             pq = []  # Priority queue
             byte_streams = {}
@@ -378,11 +376,12 @@ def get_corpus_philo_ids(corpus_file):
     object_level = 0
     with open(corpus_file, "rb") as corpus:
         buffer = corpus.read(28)
-        object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i)) * 4
+        corpus_philo_ids.add(buffer[:object_level])
         while buffer:
-            philo_id = tuple(i for i in struct.unpack(">7I", buffer) if i)
-            corpus_philo_ids.add(struct.pack(f"{len(philo_id)}i", *philo_id))
             buffer = corpus.read(28)
+            if not object_level:
+                object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i)) * 4
+            corpus_philo_ids.add(buffer[:object_level])
     return corpus_philo_ids, object_level
 
 
