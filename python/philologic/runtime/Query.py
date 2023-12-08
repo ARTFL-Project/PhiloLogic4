@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from collections import defaultdict
 import os
 import subprocess
 import sys
@@ -14,7 +13,7 @@ import signal
 from operator import le, eq
 import heapq
 import numpy as np
-
+import numpy_indexed as npi
 
 from typing import Iterator
 import lmdb
@@ -150,41 +149,30 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
             with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
                 cursor = txn.cursor()
                 if cursor.set_key(words[0].encode("utf8")):
-                    value = cursor.value()
-                    for philo_id in extract_philo_ids(value, 36):
-                        if philo_id[:object_level] in corpus_philo_ids:
-                            output_file.write(philo_id)
+                    full_array = np.frombuffer(cursor.value(), dtype=">i4").reshape(-1, 9)
+                    masks = [np.all(full_array[:, :object_level] == row, axis=1) for row in corpus_philo_ids]
+                    combined_mask = np.any(np.stack(masks, axis=0), axis=0)
+                    output_file.write(full_array[combined_mask].tobytes())
     else:
         with env.begin() as txn, open(hitlist_filename, "wb") as output_file:
             pq = []  # Priority queue
             byte_streams = {}
             philo_id_length = 36  # Length of a full philo_id (9 integers * 4 bytes each)
             cursor = txn.cursor()
+            byte_stream = b""
             for i, word in enumerate(words):
                 if cursor.set_key(word.encode("utf8")):
-                    byte_stream = cursor.value()
-                    byte_streams[i] = byte_stream
-                    first_philo_id = byte_stream[:36]
-                    heapq.heappush(pq, (first_philo_id, i, 0))  # (philo_id, word_index, byte_index)
-
-            # Iterate and write sorted philo_ids
+                    byte_stream += cursor.value()
+            full_array = np.frombuffer(byte_stream, dtype=">i4").reshape(-1, 9)
+            sorted_indices = np.lexsort((full_array[:, -1], full_array[:, 0]))  # sort by doc id and byte offset
             if corpus_file is None:
-                while pq:
-                    philo_id, word_index, byte_index = heapq.heappop(pq)
-                    output_file.write(philo_id)
-                    next_byte_index = byte_index + philo_id_length
-                    if next_byte_index < len(byte_streams[word_index]):
-                        next_philo_id = byte_streams[word_index][next_byte_index : next_byte_index + philo_id_length]
-                        heapq.heappush(pq, (next_philo_id, word_index, next_byte_index))
-            else:  # filter if philo_id not found in corpus
-                while pq:
-                    philo_id, word_index, byte_index = heapq.heappop(pq)
-                    if philo_id[:object_level] in corpus_philo_ids:
-                        output_file.write(philo_id)
-                    next_byte_index = byte_index + philo_id_length
-                    if next_byte_index < len(byte_streams[word_index]):
-                        next_philo_id = byte_streams[word_index][next_byte_index : next_byte_index + philo_id_length]
-                        heapq.heappush(pq, (next_philo_id, word_index, next_byte_index))
+                output_file.write(full_array[sorted_indices].tobytes())
+            else:
+                masks = [np.all(full_array[:, :object_level] == row, axis=1) for row in corpus_philo_ids]
+                combined_mask = np.any(np.stack(masks, axis=0), axis=0)
+                filtered_array = full_array[combined_mask]
+                sorted_indices = np.lexsort((filtered_array[:, -1], filtered_array[:, 0]))
+                output_file.write(filtered_array[sorted_indices].tobytes())
 
 
 def search_phrase(db_path, hitlist_filename, corpus_file=None):
@@ -363,6 +351,61 @@ def get_cooccurrence_groups(
         yield tuple(group_dict[philo_object_id] for group_dict in group_dicts)
 
 
+def get_cooccurrence_groups2(db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None):
+    if level == "sent":
+        philo_object = "philo_sent_id"
+        cooc_level = 6
+    elif level == "para":
+        philo_object = "philo_para_id"
+        cooc_level = 5
+    philo_object_intersection = None
+    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
+    philo_ids_per_group = []
+    philo_id_object_intersection = None
+    with env.begin() as txn:
+        cursor = txn.cursor()
+        for group_num, group in enumerate(word_groups):
+            philo_ids = b""
+            for word in group:
+                if cursor.set_key(word.encode("utf8")):
+                    philo_ids += cursor.value()
+            philo_ids_per_group.append(philo_ids)
+    env.close()
+
+    # Sort by philo_id length
+    philo_ids_per_group.sort(key=len)
+
+    # Get the intersection of philo_id_objects
+    philo_id_object_intersection = np.frombuffer(philo_ids_per_group[0], dtype=">i4").reshape(-1, 9)[:, :cooc_level]
+    for philo_ids in philo_ids_per_group[1:]:
+        matching_indices = intersecting_indices(
+            philo_id_object_intersection, np.frombuffer(philo_ids, dtype=">i4").reshape(-1, 9)[:, :cooc_level]
+        )
+        philo_id_object_intersection = philo_id_object_intersection[matching_indices]
+
+    # Load each philo_id_array into a numpy array while filtering rows that are not in the intersection
+    for i, philo_ids in enumerate(philo_ids_per_group):
+        philo_ids_per_group[i] = np.frombuffer(philo_ids, dtype=">i4").reshape(-1, 9)
+        mask = intersecting_indices(philo_ids_per_group[i][:, :cooc_level], philo_id_object_intersection)
+        philo_ids_per_group[i] = philo_ids_per_group[i][mask]
+
+    # TODO: finish the function. Fast until now.
+
+
+def cantor_pairing(a, b):
+    return (a + b) * (a + b + 1) / 2 + a
+
+
+def intersecting_indices(a, b):
+    pair_a = cantor_pairing(cantor_pairing(a[:, 0], a[:, 1]), a[:, 2])
+    pair_b = cantor_pairing(cantor_pairing(b[:, 0], b[:, 1]), b[:, 2])
+
+    boolean_array = np.in1d(pair_a, pair_b)
+    intersected_indices = np.where(boolean_array == True)[0]
+
+    return intersected_indices
+
+
 def extract_philo_ids(philo_ids: bytes, byte_length):
     """Generator that yields 36-byte long philo_ids from the byte sequence"""
     for start_byte in range(0, len(philo_ids), byte_length):
@@ -374,13 +417,9 @@ def get_corpus_philo_ids(corpus_file):
     object_level = 0
     with open(corpus_file, "rb") as corpus:
         buffer = corpus.read(28)
-        corpus_philo_ids.add(buffer[:object_level])
-        while buffer:
-            buffer = corpus.read(28)
-            if not object_level:
-                object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i)) * 4
-            corpus_philo_ids.add(buffer[:object_level])
-    return corpus_philo_ids, object_level
+        object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i))
+        array = np.frombuffer(buffer + corpus.read(), dtype=">i4").reshape(-1, 7)[:, :object_level]
+    return array, object_level
 
 
 def expand_query_not(split, freq_file, dest_fh, ascii_conversion, lowercase=True):
