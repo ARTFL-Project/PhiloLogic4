@@ -155,9 +155,6 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                     output_file.write(full_array[combined_mask].tobytes())
     else:
         with env.begin() as txn, open(hitlist_filename, "wb") as output_file:
-            pq = []  # Priority queue
-            byte_streams = {}
-            philo_id_length = 36  # Length of a full philo_id (9 integers * 4 bytes each)
             cursor = txn.cursor()
             byte_stream = b""
             for i, word in enumerate(words):
@@ -173,6 +170,7 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                 filtered_array = full_array[combined_mask]
                 sorted_indices = np.lexsort((filtered_array[:, -1], filtered_array[:, 0]))
                 output_file.write(filtered_array[sorted_indices].tobytes())
+    env.close()
 
 
 def search_phrase(db_path, hitlist_filename, corpus_file=None):
@@ -266,7 +264,7 @@ def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None
     object_level = None
     corpus_philo_ids = None
     if corpus_file is not None:
-        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
+        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file, cooc=True)
     common_object_ids = get_cooccurrence_groups(
         db_path, word_groups, level=level, corpus_philo_ids=corpus_philo_ids, object_level=object_level
     )
@@ -296,49 +294,59 @@ def get_word_groups(terms_file):
     return word_groups
 
 
-def get_cooccurrence_groups(
-    db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None
-) -> Iterator[tuple[bytes]]:
-    if level == "sent":
-        philo_object = "philo_sent_id"
-        byte_length = 24
-    elif level == "para":
-        philo_object = "philo_para_id"
-        byte_length = 20
+def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None):
+    cooc_level = 24
+    if level == "para":
+        cooc_level = 20
     philo_object_intersection = None
     env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
-    start = time.time()
+    philo_ids_per_group = []
     group_dicts = []
-    group_philo_ids = {}
+    philo_id_object_intersection = None
     with env.begin() as txn:
         cursor = txn.cursor()
-        for group_num, group in enumerate(word_groups):
+        for group in word_groups:
+            philo_ids = b""
             group_dict = {}
             for word in group:
                 if cursor.set_key(word.encode("utf8")):
-                    philo_ids = cursor.value()
-                    if corpus_philo_ids is None:
-                        for i in range(0, len(philo_ids), 36):
-                            philo_object = philo_ids[i : i + byte_length]
-                            if philo_object not in group_dict:
-                                group_dict[philo_object] = philo_ids[i : i + 36]
-                            else:
-                                group_dict[philo_object] += philo_ids[i : i + 36]
-                    else:
-                        for i in range(0, len(philo_ids), 36):
-                            philo_object = philo_ids[i : i + byte_length]
-                            if philo_object[:object_level] in corpus_philo_ids:
-                                if philo_object not in group_dict:
-                                    group_dict[philo_object] = philo_ids[i : i + 36]
-                                else:
-                                    group_dict[philo_object] += philo_ids[i : i + 36]
-            group_dicts.append(group_dict)
-            if philo_object_intersection is None:
-                philo_object_intersection = set(group_dict)
-            else:
-                philo_object_intersection.intersection_update(set(group_dict))
+                    philo_ids += cursor.value()
+            philo_ids_per_group.append(philo_ids)
 
     env.close()
+
+    # Sort group by order of philo_id length
+    philo_ids_per_group.sort(key=len)
+    first_group_set = None
+    for n, philo_id_bytes in enumerate(philo_ids_per_group):
+        group_dict = {}
+        for start_byte in range(0, len(philo_id_bytes), 36):
+            philo_id_object = philo_id_bytes[start_byte : start_byte + cooc_level]
+            if n == 0:
+                if philo_id_object not in group_dict:
+                    group_dict[philo_id_object] = philo_id_bytes[start_byte : start_byte + 36]
+                else:
+                    group_dict[philo_id_object] += philo_id_bytes[start_byte : start_byte + 36]
+            else:
+                if philo_id_object in first_group_set:
+                    if philo_id_object not in group_dict:
+                        group_dict[philo_id_object] = philo_id_bytes[start_byte : start_byte + 36]
+                    else:
+                        group_dict[philo_id_object] += philo_id_bytes[start_byte : start_byte + 36]
+        # We set the intersection to the first group_set to avoid adding what is not in the smallest group
+        if first_group_set is None:
+            first_group_set = set(group_dict)
+        group_dicts.append(group_dict)
+
+    # We calculate the intersection from the group_dicts using standard set intersection
+    philo_id_object_intersection = set(group_dicts[0])
+    for group_dict in group_dicts[1:]:
+        philo_id_object_intersection.intersection_update(set(group_dict))
+
+    if corpus_philo_ids is not None:
+        for philo_object_id in philo_id_object_intersection:
+            if philo_object_id[:object_level] not in corpus_philo_ids:
+                philo_id_object_intersection.remove(philo_object_id)
 
     def isorted(iterable):  # Lazy sort to return results as quickly as they are sorted
         lst = list(iterable)
@@ -347,63 +355,8 @@ def get_cooccurrence_groups(
         while lst:
             yield pop(lst)
 
-    for philo_object_id in isorted(philo_object_intersection):
+    for philo_object_id in isorted(philo_id_object_intersection):
         yield tuple(group_dict[philo_object_id] for group_dict in group_dicts)
-
-
-def get_cooccurrence_groups2(db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None):
-    if level == "sent":
-        philo_object = "philo_sent_id"
-        cooc_level = 6
-    elif level == "para":
-        philo_object = "philo_para_id"
-        cooc_level = 5
-    philo_object_intersection = None
-    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
-    philo_ids_per_group = []
-    philo_id_object_intersection = None
-    with env.begin() as txn:
-        cursor = txn.cursor()
-        for group_num, group in enumerate(word_groups):
-            philo_ids = b""
-            for word in group:
-                if cursor.set_key(word.encode("utf8")):
-                    philo_ids += cursor.value()
-            philo_ids_per_group.append(philo_ids)
-    env.close()
-
-    # Sort by philo_id length
-    philo_ids_per_group.sort(key=len)
-
-    # Get the intersection of philo_id_objects
-    philo_id_object_intersection = np.frombuffer(philo_ids_per_group[0], dtype=">i4").reshape(-1, 9)[:, :cooc_level]
-    for philo_ids in philo_ids_per_group[1:]:
-        matching_indices = intersecting_indices(
-            philo_id_object_intersection, np.frombuffer(philo_ids, dtype=">i4").reshape(-1, 9)[:, :cooc_level]
-        )
-        philo_id_object_intersection = philo_id_object_intersection[matching_indices]
-
-    # Load each philo_id_array into a numpy array while filtering rows that are not in the intersection
-    for i, philo_ids in enumerate(philo_ids_per_group):
-        philo_ids_per_group[i] = np.frombuffer(philo_ids, dtype=">i4").reshape(-1, 9)
-        mask = intersecting_indices(philo_ids_per_group[i][:, :cooc_level], philo_id_object_intersection)
-        philo_ids_per_group[i] = philo_ids_per_group[i][mask]
-
-    # TODO: finish the function. Fast until now.
-
-
-def cantor_pairing(a, b):
-    return (a + b) * (a + b + 1) / 2 + a
-
-
-def intersecting_indices(a, b):
-    pair_a = cantor_pairing(cantor_pairing(a[:, 0], a[:, 1]), a[:, 2])
-    pair_b = cantor_pairing(cantor_pairing(b[:, 0], b[:, 1]), b[:, 2])
-
-    boolean_array = np.in1d(pair_a, pair_b)
-    intersected_indices = np.where(boolean_array == True)[0]
-
-    return intersected_indices
 
 
 def extract_philo_ids(philo_ids: bytes, byte_length):
@@ -412,14 +365,23 @@ def extract_philo_ids(philo_ids: bytes, byte_length):
         yield philo_ids[start_byte : start_byte + byte_length]
 
 
-def get_corpus_philo_ids(corpus_file):
-    corpus_philo_ids = set()
+def get_corpus_philo_ids(corpus_file, cooc=False) -> tuple[np.ndarray, int] | tuple[set[bytes], int]:
     object_level = 0
-    with open(corpus_file, "rb") as corpus:
-        buffer = corpus.read(28)
-        object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i))
-        array = np.frombuffer(buffer + corpus.read(), dtype=">i4").reshape(-1, 7)[:, :object_level]
-    return array, object_level
+    if cooc is False:
+        with open(corpus_file, "rb") as corpus:
+            buffer = corpus.read(28)
+            object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i))
+            array = np.frombuffer(buffer + corpus.read(), dtype=">i4").reshape(-1, 7)[:, :object_level]
+        return array, object_level
+    else:
+        philo_id_set = set()
+        with open(corpus_file, "rb") as corpus:
+            buffer = corpus.read(28)
+            philo_id_set.add(buffer)
+            object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i)) * 4
+            for i in range(0, len(buffer), 28):
+                philo_id_set.add(buffer[i : i + 28])
+        return philo_id_set, object_level
 
 
 def expand_query_not(split, freq_file, dest_fh, ascii_conversion, lowercase=True):
