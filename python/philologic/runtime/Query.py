@@ -6,14 +6,13 @@ import sys
 import multiprocessing
 import sqlite3
 import struct
-from itertools import product, zip_longest
+from itertools import product
 from pathlib import Path
 import time
 import signal
 from operator import le, eq
 import heapq
 import numpy as np
-import numpy_indexed as npi
 
 from typing import Iterator
 import lmdb
@@ -230,11 +229,10 @@ def search_within_word_span(db_path, hitlist_filename, n, exact_distance, corpus
     object_level = None
     corpus_philo_ids = None
     if corpus_file is not None:
-        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
+        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file, cooc=True)
     common_object_ids = get_cooccurrence_groups(
         db_path, word_groups, corpus_philo_ids=corpus_philo_ids, object_level=object_level
     )
-    common_object_ids = get_cooccurrence_groups(db_path, word_groups, "sent")
 
     def generate_philo_ids(byte_sequence) -> Iterator[bytes]:
         """Generator that yields 36-byte long philo_ids from the byte sequence"""

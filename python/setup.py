@@ -33,6 +33,7 @@ setup(
         "unidecode",
         "lz4",
         "lmdb",
+        "numpy",
     ],
     python_requires=">=3.8",
     use_scm_version={
