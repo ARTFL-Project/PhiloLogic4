@@ -315,25 +315,18 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
 
     # Sort group by order of philo_id length
     philo_ids_per_group.sort(key=len)
-    first_group_set = None
+    first_group_set = set()
     for n, philo_id_bytes in enumerate(philo_ids_per_group):
         group_dict = {}
         for start_byte in range(0, len(philo_id_bytes), 36):
             philo_id_object = philo_id_bytes[start_byte : start_byte + cooc_level]
-            if n == 0:
+            if n == 0 or philo_id_object in first_group_set:  # We only add the philo_id if it is in the first group
                 if philo_id_object not in group_dict:
                     group_dict[philo_id_object] = philo_id_bytes[start_byte : start_byte + 36]
                 else:
                     group_dict[philo_id_object] += philo_id_bytes[start_byte : start_byte + 36]
-            else:
-                if philo_id_object in first_group_set:
-                    if philo_id_object not in group_dict:
-                        group_dict[philo_id_object] = philo_id_bytes[start_byte : start_byte + 36]
-                    else:
-                        group_dict[philo_id_object] += philo_id_bytes[start_byte : start_byte + 36]
-        # We set the intersection to the first group_set to avoid adding what is not in the smallest group
-        if first_group_set is None:
-            first_group_set = set(group_dict)
+        if n == 0:
+            first_group_set = set(group_dict)  # We only need to keep track of the first group's philo_ids
         group_dicts.append(group_dict)
 
     # We calculate the intersection from the group_dicts using standard set intersection
