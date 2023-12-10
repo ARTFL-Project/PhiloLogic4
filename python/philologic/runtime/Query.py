@@ -335,9 +335,13 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
         philo_id_object_intersection.intersection_update(set(group_dict))
 
     if corpus_philo_ids is not None:
-        for philo_object_id in philo_id_object_intersection:
-            if philo_object_id[:object_level] not in corpus_philo_ids:
-                philo_id_object_intersection.remove(philo_object_id)
+        corpus_philo_ids = np.frombuffer(b"".join(corpus_philo_ids), dtype=">u4").reshape(-1, object_level // 4)
+        intersection_array = np.frombuffer(b"".join(philo_id_object_intersection), dtype=">u4").reshape(
+            -1, cooc_level // 4
+        )
+        masks = [np.all(intersection_array[:, : object_level // 4] == row, axis=1) for row in corpus_philo_ids]
+        combined_mask = np.any(np.stack(masks, axis=0), axis=0)
+        philo_id_object_intersection = set(row.tobytes() for row in intersection_array[combined_mask])
 
     def isorted(iterable):  # Lazy sort to return results as quickly as they are sorted
         lst = list(iterable)
