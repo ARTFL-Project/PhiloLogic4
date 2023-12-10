@@ -148,7 +148,7 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
             with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
                 cursor = txn.cursor()
                 if cursor.set_key(words[0].encode("utf8")):
-                    full_array = np.frombuffer(cursor.value(), dtype=">i4").reshape(-1, 9)
+                    full_array = np.frombuffer(cursor.value(), dtype=">u4").reshape(-1, 9)
                     masks = [np.all(full_array[:, :object_level] == row, axis=1) for row in corpus_philo_ids]
                     combined_mask = np.any(np.stack(masks, axis=0), axis=0)
                     output_file.write(full_array[combined_mask].tobytes())
@@ -159,7 +159,7 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
             for i, word in enumerate(words):
                 if cursor.set_key(word.encode("utf8")):
                     byte_stream += cursor.value()
-            full_array = np.frombuffer(byte_stream, dtype=">i4").reshape(-1, 9)
+            full_array = np.frombuffer(byte_stream, dtype=">u4").reshape(-1, 9)
             sorted_indices = np.lexsort((full_array[:, -1], full_array[:, 0]))  # sort by doc id and byte offset
             if corpus_file is None:
                 output_file.write(full_array[sorted_indices].tobytes())
@@ -362,7 +362,7 @@ def get_corpus_philo_ids(corpus_file, cooc=False) -> tuple[np.ndarray, int] | tu
         with open(corpus_file, "rb") as corpus:
             buffer = corpus.read(28)
             object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i))
-            array = np.frombuffer(buffer + corpus.read(), dtype=">i4").reshape(-1, 7)[:, :object_level]
+            array = np.frombuffer(buffer + corpus.read(), dtype=">u4").reshape(-1, 7)[:, :object_level]
         return array, object_level
     else:
         philo_id_set = set()
