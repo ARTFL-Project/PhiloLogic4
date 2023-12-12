@@ -48,6 +48,24 @@ def generate_words_sorted(loader_obj, text):
     os.system(wordcommand)
 
 
+def get_lemmas(loader_obj, text):
+    """Get lemmas for each word"""
+    if loader_obj.lemmas:
+        with open(text["raw"] + ".lemma", "w", encoding="utf8") as lemma_file:
+            with open(text["raw"], encoding="utf8") as fh:
+                for line in fh:
+                    philo_type, word, philo_id, attribs = line.split("\t")
+                    if philo_type != "word":
+                        continue
+                    if loader_obj.lemmas:
+                        word = word.lower()
+                        print(f"lemma\t{loader_obj.lemmas.get(word, word)}\t{philo_id}", file=lemma_file)
+                    else:
+                        attribs = loads(attribs)
+                        print(f"lemma\t{attribs.get('lemma', word)}\tphilo_id", file=lemma_file)
+    os.system(f"lz4 -z -q {text['raw']}.lemma {text['raw']}.lemma.lz4 && rm {text['raw']}.lemma")
+
+
 def make_object_ancestors(*philo_types):
     """Find object ancestors for all stored object types"""
     # We should add support for a 'div' philo_type in the future
@@ -203,19 +221,6 @@ def generate_lines(_, text):
     """Generate lines file"""
     lines_command = 'cat %s | rg "^line" > %s' % (text["raw"], text["lines"])
     os.system(lines_command)
-
-
-def make_max_id(_, text):
-    """Define max id"""
-    max_id = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    with open(text["words"], encoding="utf8") as filehandle:
-        for line in filehandle:
-            _, _, philo_id, _ = line.split("\t")
-            philo_id = map(int, philo_id.split(" "))
-            max_id = [max(new, prev) for new, prev in zip(philo_id, max_id)]
-    with open(text["results"], "wb") as rf:
-        # write the result out--really just the resulting omax vector, which the parent will merge in below.
-        pickle.dump(max_id, rf)
 
 
 def store_in_plain_text(*philo_types):
@@ -397,6 +402,7 @@ def generate_word_frequencies(loader_obj, text):
 DefaultNavigableObjects = ("doc", "div1", "div2", "div3", "para")
 DefaultLoadFilters = [
     get_word_counts,
+    get_lemmas,
     generate_words_sorted,
     make_object_ancestors,
     make_sorted_toms,
@@ -406,7 +412,6 @@ DefaultLoadFilters = [
     generate_refs,
     generate_graphics,
     generate_lines,
-    make_max_id,
     store_words_and_philo_ids,
 ]
 

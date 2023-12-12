@@ -69,6 +69,8 @@ def format_query(q, db, config):
     elif kind == "QUOTE":
         expanded_token = token[:-1] + ".*" + token[-1]
         grep_proc = grep_exact(expanded_token, frequency_file, subprocess.PIPE)
+    elif kind == "LEMMA":
+        grep_proc = grep_word(token, frequency_file, subprocess.PIPE, db.locals["lowercase_index"])
     elif kind == "NOT" or kind == "OR":
         return []
 

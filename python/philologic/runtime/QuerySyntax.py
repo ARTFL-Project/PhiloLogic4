@@ -6,6 +6,7 @@ YEAR_MONTH = re.compile(r"^(\d+)-(\d+)\Z")
 YEAR = re.compile(r"^(\d+)\Z")
 
 patterns = [
+    ("LEMMA", r'lemma:[^\-|\s"]+'),
     ("QUOTE", r'".+?"'),
     ("QUOTE", r'".+'),
     ("NOT", "NOT"),
@@ -100,7 +101,7 @@ def group_terms(parsed):
             grouped.append(current_clause)
             current_clause = []
 
-        if kind == "TERM" or kind == "QUOTE" or kind == "NULL":
+        if kind in ("LEMMA", "TERM", "QUOTE", "NULL"):
             if last_term != "OR" and last_term != "NOT":
                 grouped.append(current_clause)
                 current_clause = []

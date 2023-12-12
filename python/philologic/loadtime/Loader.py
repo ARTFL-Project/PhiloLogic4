@@ -15,6 +15,7 @@ from json import dump
 import csv
 import subprocess
 import struct
+from collections import defaultdict
 import sqlite3
 
 import lmdb
@@ -110,6 +111,8 @@ class Loader:
     url_root = ""
     cores = 2
     ascii_conversion = ASCII_CONVERSION
+    lemmas = {}
+    # word_attributes = []
 
     @classmethod
     def set_class_attributes(cls, loader_options):
@@ -128,6 +131,12 @@ class Loader:
         cls.cores = loader_options["cores"]
         cls.ascii_conversion = loader_options["ascii_conversion"]
         cls.metadata_sql_types = loader_options["metadata_sql_types"]
+        # cls.word_attributes = loader_options["word_attributes"]
+        cls.lemmas = {}
+        with open(loader_options["lemma_file"], encoding="utf8") as lemma_file:
+            for line in lemma_file:
+                word, lemma = line.strip().split("\t")
+                cls.lemmas[word] = lemma
         for option in PARSER_OPTIONS:
             try:
                 cls.parser_config[option] = loader_options[option]
@@ -504,10 +513,7 @@ class Loader:
             print("%s: parsing %d files." % (time.ctime(), len(cls.filequeue)))
         with tqdm(total=len(cls.filequeue), smoothing=0, leave=False, desc="Parsing files") as pbar:
             with Pool(workers) as pool:
-                for results in pool.imap_unordered(cls.parse_file, range(len(cls.data_dicts))):
-                    with open(results, "rb") as proc_fh:
-                        vec = pickle.load(proc_fh)
-                    cls.omax = [max(x, y) for x, y in zip(vec, cls.omax)]
+                for _ in pool.imap_unordered(cls.parse_file, range(len(cls.data_dicts))):
                     pbar.update()
         if verbose is True:
             print("%s: done parsing" % time.ctime())
@@ -587,6 +593,10 @@ class Loader:
         print(f"{time.ctime()}: sorting words")
         self.merge_files("words")
 
+        if self.lemmas:
+            print(f"{time.ctime()}: sorting lemmas")
+            self.merge_files("lemmas")
+
         print(f"{time.ctime()}: sorting objects", flush=True)
         self.merge_files("toms")
         if self.debug is False:
@@ -625,6 +635,13 @@ class Loader:
             else:
                 open_file_command = "lz4cat"
             sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_word} {self.sort_by_id} "
+        elif file_type == "lemmas":
+            suffix = "/*raw.lemma.lz4"
+            if self.debug is False:
+                open_file_command = "lz4cat --rm"
+            else:
+                open_file_command = "lz4cat"
+            sort_command = f"LANG=C sort -S 25% -T {self.workdir} {self.sort_by_word} {self.sort_by_id} "
         else:  # sorting for toms
             suffix = "/*.toms.sorted"
             open_file_command = "cat"
@@ -667,6 +684,9 @@ class Loader:
         if file_type == "words":
             output_file = os.path.join(self.workdir, "all_words_sorted.lz4")
             command = f'/bin/bash -c "{sort_command} -b --compress-program=lz4 {sorted_files} | lz4 -q > {output_file}"'
+        elif file_type == "lemmas":
+            output_file = os.path.join(self.workdir, "all_lemmas_sorted.lz4")
+            command = f'/bin/bash -c "{sort_command} -b --compress-program=lz4 {sorted_files} | lz4 -q > {output_file}"'
         else:
             output_file = os.path.join(self.workdir, "all_toms_sorted")
             command = f'/bin/bash -c "{sort_command} {sorted_files} > {output_file}"'
@@ -697,69 +717,12 @@ class Loader:
             capture_output=True,
         )
         line_count = int(line_count_process.stdout.strip())
-        words_per_object_id = {}
-        with sqlite3.connect(f"{self.destination}/words.db") as conn, lz4.frame.open(
-            f"{self.workdir}/all_words_sorted.lz4"
-        ) as input_file:
-            current_word = None
-            current_sent_id = None
-            current_para_id = None
-            philo_ids = bytearray()
-            cursor = conn.cursor()
-            cursor.execute("DROP TABLE IF EXISTS words")
-            cursor.execute(
-                """CREATE TABLE IF NOT EXISTS words (word TEXT, philo_sent_id BLOB, philo_para_id BLOB, philo_ids BLOB)"""
-            )
-            for line in tqdm(input_file, total=line_count, desc="Storing words in SQLite database"):
-                line = line.decode("utf-8")
-                _, word, philo_id, _ = line.split("\t", 3)
-                sent_id = " ".join(philo_id.split()[:6])
-                para_id = " ".join(philo_id.split()[:5])
-                if sent_id != current_sent_id:
-                    words_per_object_id[current_word] = philo_ids  # add last word from previous object_id
-                    if current_sent_id is not None:
-                        local_sent_id = struct.pack(">6I", *map(int, current_sent_id.split()))
-                        local_para_id = struct.pack(">5I", *map(int, current_para_id.split()))
-                        for word_to_store, word_ids in words_per_object_id.items():
-                            cursor.execute(
-                                "INSERT INTO words (word, philo_sent_id, philo_para_id, philo_ids) VALUES (?, ?, ?, ?)",
-                                (word_to_store, local_sent_id, local_para_id, word_ids),
-                            )
+        db_env = lmdb.open(
+            f"{self.destination}/words.lmdb", map_size=2 * 1024 * 1024 * 1024 * 1024, max_dbs=2, writemap=True
+        )  # 2TB limit
 
-                    # Clear for new object_id
-                    words_per_object_id.clear()
-                    current_word = None
-                    current_sent_id = sent_id
-                    current_para_id = para_id
-
-                if word != current_word:
-                    if current_word is not None:
-                        words_per_object_id[current_word] = philo_ids
-                    current_word = word
-                    philo_ids.clear()
-
-                hit = list(map(int, philo_id.split()))
-                hit = hit[:6] + [hit[8]] + [hit[6], hit[7]]
-                packed_philo_id = struct.pack(">9I", *hit)
-                philo_ids.extend(packed_philo_id)
-
-            # Handle the last set of words
-            if philo_ids:
-                words_per_object_id[current_word] = philo_ids
-            for word_to_store, word_ids in words_per_object_id.items():
-                local_sent_id = struct.pack(">6I", *map(int, current_sent_id.split()))
-                local_para_id = struct.pack(">5I", *map(int, current_para_id.split()))
-                cursor.execute(
-                    "INSERT INTO words (word, philo_sent_id, philo_para_id, philo_ids) VALUES (?, ?, ?, ?)",
-                    (word_to_store, local_sent_id, local_para_id, word_ids),
-                )
-            cursor.execute("CREATE INDEX word_index ON words (word)")
-            cursor.execute("CREATE INDEX philo_sent_id_index ON words (philo_sent_id, word)")
-            cursor.execute("CREATE INDEX philo_para_id_index ON words (philo_para_id, word)")
-            cursor.execute("ANALYZE")
-            conn.commit()
-
-        db_env = lmdb.open(f"{self.destination}/words.lmdb", map_size=1024 * 1024 * 1024 * 1024)
+        db_words = db_env.open_db(b"words")
+        db_lemmas = db_env.open_db(b"lemmas")
         with lz4.frame.open(f"{self.workdir}/all_words_sorted.lz4") as input_file:
             current_word = None
             count = 0
@@ -767,7 +730,7 @@ class Loader:
             current_sent_id = None
             philo_ids = bytearray()
             txn = db_env.begin(write=True)
-            for line in tqdm(input_file, total=line_count, desc="Storing words in LMDB database"):
+            for line in tqdm(input_file, total=line_count, desc="Creating word index"):
                 line = line.decode("utf-8")
                 _, word, philo_id, _ = line.split("\t", 3)
                 hit = list(map(int, philo_id.split()))
@@ -778,6 +741,7 @@ class Loader:
                         txn.put(
                             current_word.encode("utf-8"),
                             philo_ids,
+                            db=db_words,
                         )
                         count += 1
                         if count % commit_interval == 0:
@@ -792,10 +756,92 @@ class Loader:
                 txn.put(
                     current_word.encode("utf-8"),
                     philo_ids,
+                    db=db_words,
                 )
             txn.commit()
+
+        # Create lemmas index
+        if self.lemmas:
+            print("Creating lemma index...", end=" ", flush=True)
+            with lz4.frame.open(f"{self.workdir}/all_lemmas_sorted.lz4", "rb") as input_file:
+                txn = db_env.begin(write=True)
+                lemma_per_form = {}
+                current_lemma = None
+                count = 0
+                philo_ids = bytearray()
+                for line in tqdm(input_file, total=line_count, desc="Creating lemma index"):
+                    line = line.decode("utf-8")
+                    _, lemma, philo_id = line.strip().split("\t")
+                    hit = list(map(int, philo_id.split()))
+                    hit = hit[:6] + [hit[8]] + [hit[6], hit[7]]
+                    lemma_id = struct.pack(">9I", *hit)
+                    if lemma != current_lemma:
+                        if current_lemma is not None:
+                            txn.put(
+                                current_lemma.encode("utf-8"),
+                                philo_ids,
+                                db=db_lemmas,
+                            )
+                            count += 1
+                            if count % commit_interval == 0:
+                                txn.commit()
+                                txn = db_env.begin(write=True)
+                        current_lemma = lemma
+                        philo_ids.clear()
+                    philo_ids.extend(lemma_id)
+                # Commit any remaining lemmas
+                if philo_ids:
+                    txn.put(
+                        current_lemma.encode("utf-8"),
+                        philo_ids,
+                        db=db_lemmas,
+                    )
         db_env.close()
         print("Finished creating inverted index.")
+
+        # with sqlite3.connect(f"{self.destination}/words.db") as conn, lz4.frame.open(
+        #     f"{self.workdir}/all_words_sorted.lz4"
+        # ) as input_file:
+        #     cursor = conn.cursor()
+        #     for attribute in self.word_attributes:
+        #         cursor.execute(f"CREATE TABLE IF NOT EXISTS {attribute} (word_{attribute} TEXT, philo_ids BLOB)")
+
+        #     # Initialize a dictionary holding different attributes values for each word
+        #     word_attributes = {attribute: defaultdict(bytes) for attribute in self.word_attributes}
+
+        #     current_word = None
+        #     with lz4.frame.open(f"{self.workdir}/all_words_sorted.lz4") as input_file:
+        #         for line in tqdm(input_file, total=line_count, desc="Storing words in LMDB database"):
+        #             line = line.decode("utf-8")
+        #             _, word, philo_id, attributes = line.split("\t", 3)
+        #             philo_id_bytes = struct.pack(">9I", *map(int, philo_id.split()))
+        #             local_word_attributes = loads(attributes)
+        #             for attribute in self.word_attributes:
+        #                 attribute_value = local_word_attributes[attribute]
+        #                 if attribute_value in word_attributes[attributes]:
+        #                     word_attributes[attribute][attribute_value] += philo_id_bytes
+
+        #             if word != current_word:
+        #                 if current_word is not None:
+        #                     for attribute in self.word_attributes:
+        #                         cursor.execute(
+        #                             f"INSERT INTO {attribute} (word_{attribute}, philo_ids) VALUES (?, ?)",
+        #                             (current_word, word_attributes[attribute][current_word]),
+        #                         )
+        #                 current_word = word
+        #                 word_attributes = {attribute: defaultdict(bytes) for attribute in self.word_attributes}
+
+        #     # Handle the last set of words
+        #     for attribute in self.word_attributes:
+        #         cursor.execute(
+        #             f"INSERT INTO {attribute} (word_{attribute}, philo_ids) VALUES (?, ?)",
+        #             (current_word, word_attributes[attribute][current_word]),
+        #         )
+
+        #     # Create indexes
+        #     for attribute in self.word_attributes:
+        #         cursor.execute(f"CREATE INDEX word_{attribute}_index ON {attribute} (word_{attribute})")
+        #     conn.commit()
 
     def setup_sql_load(self, verbose=True):
         """Setup SQLite DB creation"""
@@ -853,6 +899,12 @@ class Loader:
         os.mkdir(self.destination + "/hitlists/")
         os.chmod(self.destination + "/hitlists/", 0o777)
         os.chmod(os.path.join(self.destination, "TEXT"), 0o775)
+
+        # Write lemmas to frequency file
+        if self.lemmas:
+            with open(f"{self.destination}/frequencies/lemmas", "w", encoding="utf8") as freq_file:
+                for lemma in self.lemmas.values():
+                    print(f"lemma:{lemma}", file=freq_file)
 
         # Make data directory inaccessible from the outside
         fh = open(self.destination + "/.htaccess", "w")

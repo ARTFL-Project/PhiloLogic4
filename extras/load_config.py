@@ -269,6 +269,10 @@ pos_tagger = ""
 # Defines whether words should be stored in lowercase form in the index.
 lowercase_index = True
 
+# Path to a file containing a mapping of words to their lemmatized form.
+# Format is one word per line, separated by a tab from its lemma.
+lemma_file =
+
 
 ###########################################
 ####### ADVANCED CUSTOMIZATIONS ###########

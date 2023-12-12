@@ -45,7 +45,6 @@ def query(
 ):
     """Runs concordance queries"""
     sys.stdout.flush()
-    print("HOHOH", file=sys.stderr)
     parsed = parse_query(terms)
     grouped = group_terms(parsed)
     split = split_terms(grouped)
@@ -138,14 +137,20 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
         words = terms_file.read().split()
     if corpus_file is not None:
         corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
-    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False)
-    if len(words) == 1:  #
-        if corpus_file is None:
-            with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
-                output_file.write(txn.get(words[0].encode("utf8")))
-        else:
-            corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
-            with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
+    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False, max_dbs=2)
+    if len(words) == 1:
+        with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
+            if words[0].startswith("lemma:"):
+                db = env.open_db(b"lemmas", txn=txn)
+                word = words[0][6:]
+            else:
+                db = env.open_db(b"words", txn=txn)
+                word = words[0]
+            if corpus_file is None:
+                print(len(txn.get(word.encode("utf8"), db=db)))
+                output_file.write(txn.get(word.encode("utf8"), db=db))
+            else:
+                corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
                 cursor = txn.cursor()
                 if cursor.set_key(words[0].encode("utf8")):
                     full_array = np.frombuffer(cursor.value(), dtype=">u4").reshape(-1, 9)
@@ -154,7 +159,8 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                     output_file.write(full_array[combined_mask].tobytes())
     else:
         with env.begin() as txn, open(hitlist_filename, "wb") as output_file:
-            cursor = txn.cursor()
+            db = env.open_db(b"words", txn=txn)
+            cursor = txn.cursor(db=db)
             byte_stream = b""
             for i, word in enumerate(words):
                 if cursor.set_key(word.encode("utf8")):
@@ -229,7 +235,7 @@ def search_within_word_span(db_path, hitlist_filename, n, exact_distance, corpus
     object_level = None
     corpus_philo_ids = None
     if corpus_file is not None:
-        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file, cooc=True)
+        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
     common_object_ids = get_cooccurrence_groups(
         db_path, word_groups, corpus_philo_ids=corpus_philo_ids, object_level=object_level
     )
@@ -262,7 +268,7 @@ def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None
     object_level = None
     corpus_philo_ids = None
     if corpus_file is not None:
-        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file, cooc=True)
+        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
     common_object_ids = get_cooccurrence_groups(
         db_path, word_groups, level=level, corpus_philo_ids=corpus_philo_ids, object_level=object_level
     )
@@ -297,12 +303,14 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
     if level == "para":
         cooc_level = 20
     philo_object_intersection = None
-    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
+    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, max_dbs=2)
+    db_words = env.open_db(b"words")
     philo_ids_per_group = []
     group_dicts = []
     philo_id_object_intersection = None
     with env.begin() as txn:
-        cursor = txn.cursor()
+        db = env.open_db(b"words", txn=txn)
+        cursor = txn.cursor(db=db)
         for group in word_groups:
             philo_ids = b""
             group_dict = {}
@@ -360,23 +368,13 @@ def extract_philo_ids(philo_ids: bytes, byte_length):
         yield philo_ids[start_byte : start_byte + byte_length]
 
 
-def get_corpus_philo_ids(corpus_file, cooc=False) -> tuple[np.ndarray, int] | tuple[set[bytes], int]:
+def get_corpus_philo_ids(corpus_file) -> tuple[np.ndarray, int] | tuple[set[bytes], int]:
     object_level = 0
-    if cooc is False:
-        with open(corpus_file, "rb") as corpus:
-            buffer = corpus.read(28)
-            object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i))
-            array = np.frombuffer(buffer + corpus.read(), dtype=">u4").reshape(-1, 7)[:, :object_level]
-        return array, object_level
-    else:
-        philo_id_set = set()
-        with open(corpus_file, "rb") as corpus:
-            buffer = corpus.read(28)
-            philo_id_set.add(buffer)
-            object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i)) * 4
-            for i in range(0, len(buffer), 28):
-                philo_id_set.add(buffer[i : i + 28])
-        return philo_id_set, object_level
+    with open(corpus_file, "rb") as corpus:
+        buffer = corpus.read(28)
+        object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i))
+        array = np.frombuffer(buffer + corpus.read(), dtype=">u4").reshape(-1, 7)[:, :object_level]
+    return array, object_level
 
 
 def expand_query_not(split, freq_file, dest_fh, ascii_conversion, lowercase=True):
@@ -429,10 +427,23 @@ def expand_query_not(split, freq_file, dest_fh, ascii_conversion, lowercase=True
                 token = token[1:-1]
                 grep_proc = grep_exact(token, freq_file, filter_inputs[0])
                 grep_proc.wait()
+            elif kind == "LEMMA":
+                grep_proc = grep_lemma(token, freq_file, filter_inputs[0])
+                grep_proc.wait()
         # close all the pipes and wait for procs to finish.
         for pipe, proc in zip(filter_inputs, filter_procs):
             pipe.close()
             proc.wait()
+
+
+def grep_lemma(token, freq_file, dest_fh):
+    """Grep on lemmas"""
+    lemma_file = os.path.join(os.path.dirname(freq_file), "lemmas")
+    try:
+        grep_proc = subprocess.Popen(["rg", "-a", b"^%s$" % token, lemma_file], stdout=dest_fh)
+    except (UnicodeEncodeError, TypeError):
+        grep_proc = subprocess.Popen(["rg", "-a", b"^%s$" % token.encode("utf8"), lemma_file], stdout=dest_fh)
+    return grep_proc
 
 
 def grep_word(token, freq_file, dest_fh, lowercase=True):
