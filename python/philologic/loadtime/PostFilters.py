@@ -3,9 +3,11 @@
 
 import os
 import sqlite3
+import struct
 import time
 from unidecode import unidecode
 
+import lmdb
 import lz4.frame
 import msgpack
 from orjson import loads
@@ -84,49 +86,40 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=None, depth=7, ver
     return inner_make_sql_table
 
 
-def make_sentences_table(datadir, db_destination):
+def make_sentences_database(datadir, db_destination):
     """Generate a table where each row is a sentence containing all the words in it"""
+    print(f"{time.ctime()}: Loading the sentences LMDB database...")
 
-    def inner_make_sentences(_):
-        print(f"{time.ctime()}: Loading the sentences SQLite table...")
-        with sqlite3.connect(db_destination) as conn:
-            conn.text_factory = str
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute("CREATE TABLE IF NOT EXISTS sentences(philo_id text, words blob)")
-            line_count = sum(
-                sum(1 for _ in lz4.frame.open(raw_words.path))
-                for raw_words in os.scandir(f"{datadir}/words_and_philo_ids")
-            )
-            with tqdm(total=line_count, leave=False) as pbar:
-                for raw_words in os.scandir(f"{datadir}/words_and_philo_ids"):
-                    sentence_id = ""
-                    with lz4.frame.open(raw_words.path) as input_file:
-                        current_sentence = None
-                        words = []
-                        for line in input_file:
-                            word_obj = loads(line.decode("utf8"))
-                            if word_obj["philo_type"] == "word":
-                                sentence_id = " ".join(word_obj["position"].split()[:6]) + " 0"
-                                if sentence_id != current_sentence:
-                                    if current_sentence is not None:
-                                        cursor.execute(
-                                            "insert into sentences values(?, ?)",
-                                            (current_sentence, lz4.frame.compress(msgpack.dumps(words))),
-                                        )
-                                        words = []
-                                    current_sentence = sentence_id
-                                words.append({"word": word_obj["token"], "start_byte": word_obj["start_byte"]})
-                            pbar.update()
-                        if sentence_id:
-                            cursor.execute(  # insert last sentence in doc
-                                "insert into sentences values(?, ?)",
-                                (sentence_id, lz4.frame.compress(msgpack.dumps(words))),
-                            )
-            cursor.execute("create index sentence_index on sentences (philo_id)")
-            conn.commit()
-
-    return inner_make_sentences
+    line_count = sum(
+        sum(1 for _ in lz4.frame.open(raw_words.path)) for raw_words in os.scandir(f"{datadir}/words_and_philo_ids")
+    )
+    with tqdm(total=line_count, leave=False) as pbar:
+        env = lmdb.open(db_destination, map_size=2 * 1024 * 1024 * 1024 * 1024, writemap=True)  # 2TB
+        commit_interval = 10000
+        count = 0
+        with env.begin(write=True) as txn:
+            for raw_words in os.scandir(f"{datadir}/words_and_philo_ids"):
+                sentence_id = ""
+                with lz4.frame.open(raw_words.path) as input_file:
+                    current_sentence = None
+                    words = []
+                    for line in input_file:
+                        word_obj = loads(line.decode("utf8"))  # type: ignore
+                        if word_obj["philo_type"] == "word":
+                            sentence_id = struct.pack(">6I", *map(int, word_obj["position"].split()[:6]))
+                            if sentence_id != current_sentence:
+                                if current_sentence is not None:
+                                    txn.put(current_sentence, msgpack.dumps(words))
+                                    words = []
+                                    count += 1
+                                current_sentence = sentence_id
+                            words.append(
+                                (word_obj["token"], int(word_obj["position"].split()[6]), "")
+                            )  # empty string is placeholder for word attribs
+                        pbar.update()
+                    if sentence_id:
+                        txn.put(sentence_id, msgpack.dumps(words))
+        env.close()
 
 
 def word_frequencies(loader_obj):

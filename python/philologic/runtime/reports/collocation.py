@@ -6,6 +6,7 @@ import timeit
 from collections import defaultdict
 import string
 import msgpack
+import lmdb
 import lz4.frame
 
 from philologic.runtime.DB import DB
@@ -37,6 +38,7 @@ def collocation_results(request, config):
             "proxy",
             int(request["collocate_distance"]),
             raw_results=True,
+            raw_bytes=True,
             **request.metadata,
         )
     else:
@@ -45,9 +47,9 @@ def collocation_results(request, config):
             "proxy",
             request["arg"],
             raw_results=True,
+            raw_bytes=True,
             **request.metadata,
         )
-    hits.finish()
 
     # Build list of search terms to filter out
     query_words = []
@@ -59,38 +61,53 @@ def collocation_results(request, config):
     filter_list = filter_list.union(query_words)
 
     stored_sentence_id = None
-    stored_sentence_counts = defaultdict(int)
+    stored_sentence_counts = {}
     sentence_hit_count = 1
     hits_done = request.start or 0
     max_time = request.max_time or 2
-    all_collocates = defaultdict(lambda: {"count": 0})
+    all_collocates = {}
     cursor = db.dbh.cursor()
     start_time = timeit.default_timer()
-    for hit in hits[hits_done:]:  # TODO: work in bytes only. Returns bytes from hitlist
-        sentence = f"{hit[0]} {hit[1]} {hit[2]} {hit[3]} {hit[4]} {hit[5]} 0"
-        cursor.execute("SELECT words FROM sentences WHERE philo_id = ?", (sentence,))
-        words = msgpack.loads(lz4.frame.decompress(cursor.fetchone()[0]))
-        parent = hit[:6] + (0,)
-        if parent != stored_sentence_id:
-            sentence_hit_count = 1
-            stored_sentence_id = parent
-            stored_sentence_counts = defaultdict(int)
-            for collocate in words:
-                if collocate["word"] not in filter_list:  # TODO: check if removing filtered words at the end is faster
-                    stored_sentence_counts[collocate["word"]] += 1
-        else:
-            sentence_hit_count += 1
-        for word in stored_sentence_counts:
-            if stored_sentence_counts[word] < sentence_hit_count:
-                continue
-            all_collocates[word]["count"] += 1
-        hits_done += 1
 
-        elapsed = timeit.default_timer() - start_time
-        # avoid timeouts by splitting the query if more than request.max_time (in
-        # seconds) has been spent in the loop
-        if elapsed > int(max_time):
-            break
+    env = lmdb.open(
+        os.path.join(db.path, "sentences.lmdb"),
+        readonly=True,
+        lock=False,
+    )
+    with env.begin() as txn:
+        cursor = txn.cursor()
+        for hit in hits[hits_done:]:  # TODO: work in bytes only. Returns bytes from hitlist
+            parent_sentence = hit[:24]  # 24 bytes for the first 6 integers
+            sentence = cursor.get(parent_sentence)
+            word_objects = msgpack.loads(sentence)
+            if parent_sentence != stored_sentence_id:
+                sentence_hit_count = 1
+                stored_sentence_id = parent_sentence
+                stored_sentence_counts = {}
+                for collocate, _, _ in word_objects:
+                    if collocate not in filter_list:  # TODO: check if removing filtered words at the end is faster
+                        if collocate not in stored_sentence_counts:
+                            stored_sentence_counts[collocate] = 1
+                        else:
+                            stored_sentence_counts[collocate] += 1
+            else:
+                sentence_hit_count += 1
+            for word in stored_sentence_counts:
+                if stored_sentence_counts[word] < sentence_hit_count:
+                    continue
+                if word not in all_collocates:
+                    all_collocates[word] = {"count": 1}
+                else:
+                    all_collocates[word]["count"] += 1
+            hits_done += 1
+
+            elapsed = timeit.default_timer() - start_time
+            # avoid timeouts by splitting the query if more than request.max_time (in
+            # seconds) has been spent in the loop
+            if elapsed > int(max_time):
+                break
+    env.close()
+    hits.finish()
 
     collocation_object["collocates"] = all_collocates
     collocation_object["results_length"] = len(hits)

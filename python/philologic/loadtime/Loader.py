@@ -27,7 +27,7 @@ import regex as re
 from black import FileMode, format_str
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
-from philologic.loadtime.PostFilters import make_sentences_table, make_sql_table
+from philologic.loadtime.PostFilters import make_sentences_database, make_sql_table
 from philologic.utils import (
     convert_entities,
     extract_full_date,
@@ -45,7 +45,7 @@ OBJECT_TYPES = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
 BLOCKSIZE = 2048  # index block size.  Don't alter.
 INDEX_CUTOFF = 10  # index frequency cutoff.  Don't alter.
 
-DEFAULT_TABLES = ("toms", "pages", "refs", "graphics", "lines", "sentences")
+DEFAULT_TABLES = ("toms", "pages", "refs", "graphics", "lines")
 
 DEFAULT_OBJECT_LEVEL = "doc"
 
@@ -731,7 +731,7 @@ class Loader:
             philo_ids = bytearray()
             txn = db_env.begin(write=True)
             for line in tqdm(input_file, total=line_count, desc="Creating word index"):
-                line = line.decode("utf-8")
+                line = line.decode("utf-8")  # type: ignore
                 _, word, philo_id, _ = line.split("\t", 3)
                 hit = list(map(int, philo_id.split()))
                 hit = hit[:6] + [hit[8]] + [hit[6], hit[7]]
@@ -754,7 +754,7 @@ class Loader:
             # Commit any remaining words
             if philo_ids:
                 txn.put(
-                    current_word.encode("utf-8"),
+                    current_word.encode("utf-8"),  # type: ignore
                     philo_ids,
                     db=db_words,
                 )
@@ -870,11 +870,7 @@ class Loader:
                 file_in = self.destination + "/WORK/all_lines"
                 indices = [("doc_id", "start_byte", "end_byte")]
                 depth = 9
-            if table == "sentences":
-                db_destination = os.path.join(self.destination, "toms.db")
-                post_filter = make_sentences_table(self.destination, db_destination)
-            else:
-                post_filter = make_sql_table(table, file_in, indices=indices, depth=depth, verbose=verbose)
+            post_filter = make_sql_table(table, file_in, indices=indices, depth=depth, verbose=verbose)
             self.post_filters.insert(0, post_filter)
 
     @classmethod
@@ -887,6 +883,11 @@ class Loader:
                 cls.metadata_fields_not_found = f(cls)
             else:
                 f(cls)
+
+        # Set up sentences database
+        db_destination = os.path.join(cls.destination, "sentences.lmdb")
+        make_sentences_database(cls.destination, db_destination)
+
         if extra_filters:
             print("Running the following additional filters:")
             for f in extra_filters:

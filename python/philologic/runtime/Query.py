@@ -39,6 +39,7 @@ def query(
     query_debug=False,
     sort_order=None,
     raw_results=False,
+    raw_bytes=False,
     ascii_conversion=True,
     object_level="sent",
     exact=1,
@@ -90,6 +91,7 @@ def query(
             method=method,
             sort_order=sort_order,
             raw=raw_results,
+            raw_bytes=raw_bytes,
             ascii_conversion=ascii_conversion,
         )
         return hits

@@ -109,6 +109,7 @@ class DB:
         limit="",
         sort_order=["rowid"],
         raw_results=False,
+        raw_bytes=False,
         get_word_count_field=None,
         **metadata,
     ):  # pylint: disable=dangerous-default-value
@@ -206,6 +207,7 @@ class DB:
                     self,
                     sort_order=sort_order,
                     raw=raw_results,
+                    raw_bytes=raw_bytes,
                     ascii_conversion=self.locals.ascii_conversion,
                 )
                 corpus.finish()
@@ -235,6 +237,7 @@ class DB:
                     filename=search_file,
                     sort_order=sort_order,
                     raw_results=raw_results,
+                    raw_bytes=raw_bytes,
                     ascii_conversion=self.locals.ascii_conversion,
                     exact=exact,
                 )
@@ -248,6 +251,7 @@ class DB:
                 self,
                 sort_order=sort_order,
                 raw=raw_results,
+                raw_bytes=raw_bytes,
                 ascii_conversion=self.locals.ascii_conversion,
             )
         if corpus:
