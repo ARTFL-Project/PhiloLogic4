@@ -17,16 +17,6 @@ remove_punctuation_map = dict((ord(char), None) for char in string.punctuation i
 def collocation_results(request, config):
     """Fetch collocation results"""
     db = DB(config.db_path + "/data/")
-    if request["collocate_distance"]:
-        hits = db.query(
-            request["q"],
-            "proxy",
-            int(request["collocate_distance"]),
-            **request.metadata,
-        )
-    else:
-        hits = db.query(request["q"], "cooc", request["arg"], **request.metadata)
-    hits.finish()
     collocation_object = {"query": dict([i for i in request])}
 
     try:
@@ -40,15 +30,6 @@ def collocation_results(request, config):
         filter_list = build_filter_list(request, config)
     collocation_object["filter_list"] = filter_list
     filter_list = set(filter_list)
-
-    # Build list of search terms to filter out
-    query_words = []
-    for group in get_expanded_query(hits):
-        for word in group:
-            word = word.replace('"', "")
-            query_words.append(word)
-    query_words = set(query_words)
-    filter_list = filter_list.union(query_words)
 
     if request["collocate_distance"]:
         hits = db.query(
@@ -67,6 +48,16 @@ def collocation_results(request, config):
             **request.metadata,
         )
     hits.finish()
+
+    # Build list of search terms to filter out
+    query_words = []
+    for group in get_expanded_query(hits):
+        for word in group:
+            word = word.replace('"', "")
+            query_words.append(word)
+    query_words = set(query_words)
+    filter_list = filter_list.union(query_words)
+
     stored_sentence_id = None
     stored_sentence_counts = defaultdict(int)
     sentence_hit_count = 1
@@ -75,7 +66,7 @@ def collocation_results(request, config):
     all_collocates = defaultdict(lambda: {"count": 0})
     cursor = db.dbh.cursor()
     start_time = timeit.default_timer()
-    for hit in hits[hits_done:]:
+    for hit in hits[hits_done:]:  # TODO: work in bytes only. Returns bytes from hitlist
         sentence = f"{hit[0]} {hit[1]} {hit[2]} {hit[3]} {hit[4]} {hit[5]} 0"
         cursor.execute("SELECT words FROM sentences WHERE philo_id = ?", (sentence,))
         words = msgpack.loads(lz4.frame.decompress(cursor.fetchone()[0]))
@@ -85,7 +76,7 @@ def collocation_results(request, config):
             stored_sentence_id = parent
             stored_sentence_counts = defaultdict(int)
             for collocate in words:
-                if collocate["word"] not in filter_list:
+                if collocate["word"] not in filter_list:  # TODO: check if removing filtered words at the end is faster
                     stored_sentence_counts[collocate["word"]] += 1
         else:
             sentence_hit_count += 1
