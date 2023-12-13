@@ -302,20 +302,24 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
     cooc_level = 24
     if level == "para":
         cooc_level = 20
-    philo_object_intersection = None
     env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, max_dbs=2)
-    db_words = env.open_db(b"words")
     philo_ids_per_group = []
     group_dicts = []
     philo_id_object_intersection = None
     with env.begin() as txn:
         db = env.open_db(b"words", txn=txn)
+        lemma_cursor = None
         cursor = txn.cursor(db=db)
         for group in word_groups:
             philo_ids = b""
             group_dict = {}
             for word in group:
-                if cursor.set_key(word.encode("utf8")):
+                if word.startswith("lemma:"):
+                    if lemma_cursor is None:
+                        lemma_cursor = txn.cursor(db=env.open_db(b"lemmas", txn=txn))
+                    if lemma_cursor.set_key(word[6:].encode("utf8")):
+                        philo_ids += lemma_cursor.value()
+                elif cursor.set_key(word.encode("utf8")):
                     philo_ids += cursor.value()
             philo_ids_per_group.append(philo_ids)
 
