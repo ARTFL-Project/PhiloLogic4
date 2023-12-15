@@ -121,16 +121,6 @@ def collocation_results(request, config):
     return collocation_object
 
 
-def extract_bytes(hit):
-    remaining = list(hit[8:])
-    byte_offsets = []
-    while remaining:
-        if remaining:
-            byte_offsets.append(remaining.pop(0))
-    byte_offsets.sort()
-    return byte_offsets
-
-
 def build_filter_list(request, config):
     """set up filtering with stopwords or most frequent terms."""
     if config.stopwords and request.colloc_filter_choice == "stopwords":

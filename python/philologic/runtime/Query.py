@@ -21,6 +21,7 @@ import regex as re
 from philologic.runtime import HitList
 from philologic.runtime.QuerySyntax import group_terms, parse_query
 from unidecode import unidecode
+from numba import njit, jit
 
 
 OBJECT_LEVEL = {"para": 5, "sent": 6}
@@ -160,24 +161,34 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                     combined_mask = np.any(np.stack(masks, axis=0), axis=0)
                     output_file.write(full_array[combined_mask].tobytes())
     else:
-        with env.begin() as txn, open(hitlist_filename, "wb") as output_file:
+        with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
             db = env.open_db(b"words", txn=txn)
             cursor = txn.cursor(db=db)
-            byte_stream = b""
-            for i, word in enumerate(words):
-                if cursor.set_key(word.encode("utf8")):
-                    byte_stream += cursor.value()
-            full_array = np.frombuffer(byte_stream, dtype=">u4").reshape(-1, 9)
-            sorted_indices = np.lexsort((full_array[:, -1], full_array[:, 0]))  # sort by doc id and byte offset
-            if corpus_file is None:
-                output_file.write(full_array[sorted_indices].tobytes())
-            else:
-                masks = [np.all(full_array[:, :object_level] == row, axis=1) for row in corpus_philo_ids]
-                combined_mask = np.any(np.stack(masks, axis=0), axis=0)
-                filtered_array = full_array[combined_mask]
-                sorted_indices = np.lexsort((filtered_array[:, -1], filtered_array[:, 0]))
-                output_file.write(filtered_array[sorted_indices].tobytes())
+            hit_size = 36
+
+            # Create a generator for each word
+            generators = (philo_id_generator(cursor, word, hit_size) for word in words)
+
+            # Merge the generators and write the results to the output file
+            for merged_philo_id in heapq.merge(*generators):
+                output_file.write(merged_philo_id)
     env.close()
+
+
+def philo_id_generator(cursor, word, hit_size, corpus_file=None):
+    """Generator that yields philo_ids for a given word."""
+    if cursor.set_key(word.encode("utf8")):
+        value = cursor.value()
+        if corpus_file is None:
+            for i in range(0, len(value), hit_size):
+                yield bytes(value[i : i + hit_size])
+        else:
+            corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
+            full_array = np.frombuffer(value, dtype=">u4").reshape(-1, 9)
+            masks = [np.all(full_array[:, :object_level] == row, axis=1) for row in corpus_philo_ids]
+            combined_mask = np.any(np.stack(masks, axis=0), axis=0)
+            for row in full_array[combined_mask]:
+                yield row.tobytes()
 
 
 def search_phrase(db_path, hitlist_filename, corpus_file=None):
@@ -349,7 +360,7 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
         philo_id_object_intersection.intersection_update(set(group_dict))
 
     if corpus_philo_ids is not None:
-        corpus_philo_ids = np.frombuffer(b"".join(corpus_philo_ids), dtype=">u4").reshape(-1, object_level // 4)
+        # corpus_philo_ids = np.frombuffer(b"".join(corpus_philo_ids), dtype=">u4").reshape(-1, object_level // 4)
         intersection_array = np.frombuffer(b"".join(philo_id_object_intersection), dtype=">u4").reshape(
             -1, cooc_level // 4
         )
@@ -374,13 +385,20 @@ def extract_philo_ids(philo_ids: bytes, byte_length):
         yield philo_ids[start_byte : start_byte + byte_length]
 
 
-def get_corpus_philo_ids(corpus_file) -> tuple[np.ndarray, int] | tuple[set[bytes], int]:
+def get_corpus_philo_ids(corpus_file, byte_output=False) -> tuple[np.ndarray, int] | tuple[set[bytes], int]:
     object_level = 0
     with open(corpus_file, "rb") as corpus:
         buffer = corpus.read(28)
         object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i))
-        array = np.frombuffer(buffer + corpus.read(), dtype=">u4").reshape(-1, 7)[:, :object_level]
-    return array, object_level
+        if byte_output is False:
+            return np.frombuffer(buffer + corpus.read(), dtype=">u4").reshape(-1, 7)[:, :object_level], object_level
+        else:
+            object_level *= 4
+            philo_ids = {buffer}
+            corpus = corpus.read()
+            for philo_id in extract_philo_ids(corpus, 28):
+                philo_ids.add(philo_id)
+            return philo_ids, object_level
 
 
 def expand_query_not(split, freq_file, dest_fh, ascii_conversion, lowercase=True):
