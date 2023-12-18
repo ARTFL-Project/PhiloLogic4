@@ -24,6 +24,7 @@ class HitWrapper:
     def __init__(self, hit, db, obj_type=False, method="proxy"):
         self.db = db
         self.hit = hit
+        print(hit, file=sys.stderr)
         if obj_type:
             self.object_type = obj_type
         else:

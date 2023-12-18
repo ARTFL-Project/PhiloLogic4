@@ -138,6 +138,7 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
     """Search for a single word in the database."""
     with open(f"{hitlist_filename}.terms", "r") as terms_file:
         words = terms_file.read().split()
+    corpus_philo_ids = None
     if corpus_file is not None:
         corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
     env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False, max_dbs=2)
@@ -163,32 +164,71 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
     else:
         with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
             db = env.open_db(b"words", txn=txn)
-            cursor = txn.cursor(db=db)
-            hit_size = 36
 
-            # Create a generator for each word
-            generators = (philo_id_generator(cursor, word, hit_size) for word in words)
+            # Initialize data structures for each word
+            word_data = {word: {"buffer": None, "array": None, "index": 0} for word in words}
+            chunk_size = (
+                36 * 500000
+            )  # 500000 hits per chunk : increasing this number increases speed, but also memory usage
 
-            # Merge the generators and write the results to the output file
-            for merged_philo_id in heapq.merge(*generators):
-                output_file.write(merged_philo_id)
+            # Function to load next chunk
+            def load_next_chunk(word):
+                word_info = word_data[word]
+                buffer = txn.get(word.encode("utf8"), db=db)
+                start = word_info["index"]
+                end = start + chunk_size
+                word_info["array"] = np.frombuffer(buffer[start:end], dtype=">u4").reshape(-1, 9)
+                word_info["index"] = end
+                if corpus_philo_ids is not None:
+                    masks = [np.all(word_info["array"][:, :object_level] == row, axis=1) for row in corpus_philo_ids]
+                    combined_mask = np.any(np.stack(masks, axis=0), axis=0)
+                    word_info["array"] = word_info["array"][combined_mask]
+                    word_info["buffer"] = word_info["array"].tobytes()
+                else:
+                    word_info["buffer"] = buffer[start:end]
+
+            # Load initial chunks
+            for word in words:
+                load_next_chunk(word)
+
+            # Merge sort and write loop
+            while any(word_data[word]["array"].size > 0 for word in words):
+                # Check if any chunk can be written directly without merge
+                write_directly_word = None
+                words_first_last_row = [
+                    (word, word_data[word]["array"][0, ::8], word_data[word]["array"][-1, ::8])
+                    for word in words
+                    if word_data[word]["array"].size > 0
+                ]
+
+                words_first_last_row.sort(key=lambda x: (x[1][0], x[1][1]))
+                word, _, last_row = words_first_last_row[0]  # First row, first and last values
+                write_directly_word = word
+
+                for _, first_row_other, _ in words_first_last_row[1:]:
+                    if is_greater(last_row, first_row_other) is True:
+                        write_directly_word = None
+                        break
+
+                if write_directly_word:
+                    output_file.write(word_data[write_directly_word]["buffer"])
+                    load_next_chunk(write_directly_word)
+                else:  # If no direct write, perform merge sort
+                    combined_arrays = np.concatenate(
+                        [word_data[word]["array"] for word in words if word_data[word]["array"].size > 0], dtype=">u4"
+                    )
+                    sorted_indices = np.lexsort((combined_arrays[:, -1], combined_arrays[:, 0]))
+                    output_file.write(combined_arrays[sorted_indices].tobytes())
+
+                    # Load next chunks for all words
+                    for word in words:
+                        load_next_chunk(word)
+
     env.close()
 
 
-def philo_id_generator(cursor, word, hit_size, corpus_file=None):
-    """Generator that yields philo_ids for a given word."""
-    if cursor.set_key(word.encode("utf8")):
-        value = cursor.value()
-        if corpus_file is None:
-            for i in range(0, len(value), hit_size):
-                yield bytes(value[i : i + hit_size])
-        else:
-            corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
-            full_array = np.frombuffer(value, dtype=">u4").reshape(-1, 9)
-            masks = [np.all(full_array[:, :object_level] == row, axis=1) for row in corpus_philo_ids]
-            combined_mask = np.any(np.stack(masks, axis=0), axis=0)
-            for row in full_array[combined_mask]:
-                yield row.tobytes()
+def is_greater(arr1, arr2):
+    return arr1[0] > arr2[0] or (arr1[0] == arr2[0] and arr1[1] > arr2[1])
 
 
 def search_phrase(db_path, hitlist_filename, corpus_file=None):
@@ -360,7 +400,6 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
         philo_id_object_intersection.intersection_update(set(group_dict))
 
     if corpus_philo_ids is not None:
-        # corpus_philo_ids = np.frombuffer(b"".join(corpus_philo_ids), dtype=">u4").reshape(-1, object_level // 4)
         intersection_array = np.frombuffer(b"".join(philo_id_object_intersection), dtype=">u4").reshape(
             -1, cooc_level // 4
         )
