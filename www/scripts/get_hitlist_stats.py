@@ -4,6 +4,7 @@ import os
 import sys
 from wsgiref.handlers import CGIHandler
 
+import numpy as np
 import orjson
 from philologic.runtime.DB import DB
 
@@ -57,10 +58,19 @@ def get_total_count(environ, start_response):
     hits.finish()
     total_results = 0
     docs = [set() for _ in range(len(config["results_summary"]))]
-    for hit in hits:
-        for pos, field in enumerate(config["results_summary"]):
-            docs[pos].add(tuple_to_str(hit, OBJ_DICT[field["object_level"]]))
-        total_results += 1
+
+    with open(hits.filename, "rb") as buffer:
+        current_hits = buffer.read(360000)  # read 1000 hits initially
+        while current_hits:
+            hits_array = np.frombuffer(current_hits, dtype=">u4").reshape(-1, 9)
+
+            for pos, field in enumerate(config["results_summary"]):
+                obj_level = OBJ_DICT[field["object_level"]]
+                # Convert each hit to a tuple and add to the respective set
+                docs[pos].update(map(lambda hit: tuple_to_str(hit, obj_level), hits_array))
+            total_results += hits_array.shape[0]
+            current_hits = buffer.read(360000)
+
     stats = []
     cursor = db.dbh.cursor()
     for pos, field_obj in enumerate(config["results_summary"]):
