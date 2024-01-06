@@ -3,11 +3,9 @@
 
 import os
 import timeit
-from collections import defaultdict
 import string
 import msgpack
 import lmdb
-import lz4.frame
 
 from philologic.runtime.DB import DB
 from philologic.runtime.Query import get_expanded_query

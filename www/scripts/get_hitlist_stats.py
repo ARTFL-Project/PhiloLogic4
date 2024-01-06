@@ -62,7 +62,7 @@ def get_total_count(environ, start_response):
     with open(hits.filename, "rb") as buffer:
         current_hits = buffer.read(360000)  # read 1000 hits initially
         while current_hits:
-            hits_array = np.frombuffer(current_hits, dtype=">u4").reshape(-1, 9)
+            hits_array = np.frombuffer(current_hits, dtype="u4").reshape(-1, hits.length)
 
             for pos, field in enumerate(config["results_summary"]):
                 obj_level = OBJ_DICT[field["object_level"]]

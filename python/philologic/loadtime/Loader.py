@@ -735,7 +735,7 @@ class Loader:
                 _, word, philo_id, _ = line.split("\t", 3)
                 hit = list(map(int, philo_id.split()))
                 hit = hit[:6] + [hit[8]] + [hit[6], hit[7]]
-                word_id = struct.pack(">9I", *hit)
+                word_id = struct.pack("9I", *hit)
                 if word != current_word:
                     if current_word is not None:
                         txn.put(
@@ -774,7 +774,7 @@ class Loader:
                     _, lemma, philo_id = line.strip().split("\t")
                     hit = list(map(int, philo_id.split()))
                     hit = hit[:6] + [hit[8]] + [hit[6], hit[7]]
-                    lemma_id = struct.pack(">9I", *hit)
+                    lemma_id = struct.pack("9I", *hit)
                     if lemma != current_lemma:
                         if current_lemma is not None:
                             txn.put(

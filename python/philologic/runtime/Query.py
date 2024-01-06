@@ -8,10 +8,8 @@ import sqlite3
 import struct
 from itertools import product
 from pathlib import Path
-import time
 import signal
 from operator import le, eq
-import heapq
 import numpy as np
 
 from typing import Iterator
@@ -21,7 +19,7 @@ import regex as re
 from philologic.runtime import HitList
 from philologic.runtime.QuerySyntax import group_terms, parse_query
 from unidecode import unidecode
-from numba import njit, jit
+from numba import jit
 
 
 OBJECT_LEVEL = {"para": 5, "sent": 6}
@@ -151,13 +149,12 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                 db = env.open_db(b"words", txn=txn)
                 word = words[0]
             if corpus_file is None:
-                print(len(txn.get(word.encode("utf8"), db=db)))
                 output_file.write(txn.get(word.encode("utf8"), db=db))
             else:
                 corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
                 cursor = txn.cursor()
                 if cursor.set_key(words[0].encode("utf8")):
-                    full_array = np.frombuffer(cursor.value(), dtype=">u4").reshape(-1, 9)
+                    full_array = np.frombuffer(cursor.value(), dtype="u4").reshape(-1, 9)
                     masks = [np.all(full_array[:, :object_level] == row, axis=1) for row in corpus_philo_ids]
                     combined_mask = np.any(np.stack(masks, axis=0), axis=0)
                     output_file.write(full_array[combined_mask].tobytes())
@@ -171,10 +168,6 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                     output_file.write(philo_ids[combined_mask].tobytes())
                 output_file.write(philo_ids.tobytes())
     env.close()
-
-
-def is_greater(arr1, arr2):
-    return arr1[0] > arr2[0] or (arr1[0] == arr2[0] and arr1[1] > arr2[1])
 
 
 def search_phrase(db_path, hitlist_filename, corpus_file=None):
@@ -297,85 +290,17 @@ def get_word_groups(terms_file):
     return word_groups
 
 
-def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None):
-    cooc_level = 24
-    if level == "para":
-        cooc_level = 20
-    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, max_dbs=2)
-    philo_ids_per_group = []
-    group_dicts = []
-    philo_id_object_intersection = None
-    with env.begin() as txn:
-        db = env.open_db(b"words", txn=txn)
-        lemma_cursor = None
-        cursor = txn.cursor(db=db)
-        for group in word_groups:
-            philo_ids = b""
-            group_dict = {}
-            for word in group:
-                if word.startswith("lemma:"):
-                    if lemma_cursor is None:
-                        lemma_cursor = txn.cursor(db=env.open_db(b"lemmas", txn=txn))
-                    if lemma_cursor.set_key(word[6:].encode("utf8")):
-                        philo_ids += lemma_cursor.value()
-                elif cursor.set_key(word.encode("utf8")):
-                    philo_ids += cursor.value()
-            philo_ids_per_group.append(philo_ids)
-
-    env.close()
-
-    # Sort group by order of philo_id length
-    philo_ids_per_group.sort(key=len)
-    first_group_set = set()
-    for n, philo_id_bytes in enumerate(philo_ids_per_group):
-        group_dict = {}
-        for start_byte in range(0, len(philo_id_bytes), 36):
-            philo_id_object = philo_id_bytes[start_byte : start_byte + cooc_level]
-            if n == 0 or philo_id_object in first_group_set:  # We only add the philo_id if it is in the first group
-                if philo_id_object not in group_dict:
-                    group_dict[philo_id_object] = philo_id_bytes[start_byte : start_byte + 36]
-                else:
-                    group_dict[philo_id_object] += philo_id_bytes[start_byte : start_byte + 36]
-        if n == 0:
-            first_group_set = set(group_dict)  # We only need to keep track of the first group's philo_ids
-        group_dicts.append(group_dict)
-
-    # We calculate the intersection from the group_dicts using standard set intersection
-    philo_id_object_intersection = set(group_dicts[0])
-    for group_dict in group_dicts[1:]:
-        philo_id_object_intersection.intersection_update(set(group_dict))
-
-    if corpus_philo_ids is not None:
-        intersection_array = np.frombuffer(b"".join(philo_id_object_intersection), dtype=">u4").reshape(
-            -1, cooc_level // 4
-        )
-        masks = [np.all(intersection_array[:, : object_level // 4] == row, axis=1) for row in corpus_philo_ids]
-        combined_mask = np.any(np.stack(masks, axis=0), axis=0)
-        philo_id_object_intersection = set(row.tobytes() for row in intersection_array[combined_mask])
-
-    def isorted(iterable):  # Lazy sort to return results as quickly as they are sorted
-        lst = list(iterable)
-        heapq.heapify(lst)
-        pop = heapq.heappop
-        while lst:
-            yield pop(lst)
-
-    for philo_object_id in isorted(philo_id_object_intersection):
-        yield tuple(group_dict[philo_object_id] for group_dict in group_dicts)
-
-
 def extract_philo_ids(philo_ids: bytes, byte_length):
     """Generator that yields 36-byte long philo_ids from the byte sequence"""
     for start_byte in range(0, len(philo_ids), byte_length):
         yield philo_ids[start_byte : start_byte + byte_length]
 
 
-def get_cooccurrence_groups_mun(db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None):
+def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None):
     cooc_slice = 6
     if level == "para":
         cooc_slice = 5
     env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, max_dbs=2)
-    # start = time.time()
     with env.begin(buffers=True) as txn:
         db_words = env.open_db(b"words", txn=txn)
 
@@ -388,75 +313,70 @@ def get_cooccurrence_groups_mun(db_path, word_groups, level="sent", corpus_philo
             byte_size_per_group.append(byte_size)
         # Perform an argsort on the list to get the indices of the groups sorted by byte size
         sorted_indices = np.argsort(byte_size_per_group)
-        # print("Sort", time.time() - start)
 
         # Process each word group
-        first_group_data = None
+        first_group_data = np.array([])
         group_generators = []
         for index in sorted_indices:
             words = word_groups[index]
             if index == sorted_indices[0]:  # grab the entire first group
-                first_group_data = np.frombuffer(
-                    b"".join([i for i in merge_word_group(txn, db_words, words, corpus_philo_ids, object_level)]),
-                    dtype=">u4",
-                ).reshape(-1, 9)
+                first_group_data = np.concatenate([i for i in merge_word_group(txn, db_words, words)], dtype="u4")
             else:
-                group_generators.append(merge_word_group(txn, db_words, words, corpus_philo_ids, object_level))
+                group_generators.append(merge_word_group(txn, db_words, words, chunk_size=36 * 1000))
 
-        # Create a generator function which takes a group of philo_ids and returns an array
-        def create_array(philo_id_group):
-            try:
-                philo_ids = next(philo_id_group)
-            except StopIteration:
-                raise StopIteration
-            array = np.frombuffer(philo_ids, dtype=">u4").reshape(-1, 9)
-            return array
-
-        # print("Starting merge", time.time() - start)
-
-        # Go over the remaining groups and add the philo_ids to the group_dicts
-        group_data = [None for _ in range(len(word_groups) - 1)]
+        group_data = [None for _ in range(len(word_groups) - 1)]  # Start with None for each group
         break_out = False
         previous_row = None
         for index in first_group_data:
+            philo_id_object = index[:cooc_slice]
+            if previous_row is not None and compare_rows(philo_id_object, previous_row) == 0:
+                continue
             results = []
             match = True
-            philo_id_object = index[:cooc_slice]
-            if np.array_equal(philo_id_object, previous_row) and previous_row is not None:
-                continue
             previous_row = philo_id_object
             for group_index, philo_id_group in enumerate(group_generators):
                 if group_data[group_index] is None:
-                    try:
-                        philo_id_df = create_array(philo_id_group)
-                    except StopIteration:
-                        break_out = True
-                        break
+                    philo_id_array = next(philo_id_group)  # load the first chunk
                 else:
-                    philo_id_df = group_data[group_index]
+                    philo_id_array = group_data[group_index]
+
+                if philo_id_array.shape[0] == 0:  # type: ignore
+                    break_out = True
+                    break
 
                 # Is the first row greater than the current philo_id_object?
-                if compare_rows(philo_id_df[0][:cooc_slice], philo_id_object) == 1:
+                if compare_rows(philo_id_array[0, :cooc_slice], philo_id_object) == 1:
                     match = False
+                    group_data[group_index] = philo_id_array
                     break
 
                 # Is the last row less than the current philo_id_object?
-                while compare_rows(philo_id_df[-1][:cooc_slice], philo_id_object) == -1:
+                while compare_rows(philo_id_array[-1, :cooc_slice], philo_id_object) == -1:
                     try:
-                        philo_id_df = create_array(philo_id_group)
-                    except StopIteration:
+                        philo_id_array = next(philo_id_group)  # load the next chunk
+                    except StopIteration:  # no more philo_ids in this group, we are done
                         break_out = True
                         break
 
                 if break_out is True:
                     break
 
-                equal_rows_mask = np.all(philo_id_df[:, :cooc_slice] == philo_id_object, axis=1)
-                matching_rows = philo_id_df[equal_rows_mask]
-                if matching_rows.shape[0] == 0:
+                # Find matching rows
+                matching_indices = find_matching_indices_sorted(philo_id_array, philo_id_object, cooc_slice)
+                matching_rows = philo_id_array[matching_indices]
+                group_data[group_index] = philo_id_array
+                if matching_rows.shape[0] == 0:  # no match found
                     match = False
                     break
-                group_data[group_index] = philo_id_df
+                if matching_indices.shape[0] > 0:
+                    if matching_indices[-1] + 1 == philo_id_array.shape[0]:
+                        try:
+                            group_data[group_index] = next(philo_id_group)  # load the next chunk
+                        except StopIteration:
+                            break_out = True
+                    else:
+                        group_data[group_index] = philo_id_array[matching_indices[-1] + 1 :]  # slice off matching rows
+
                 results.append(
                     matching_rows[0].tobytes()
                 )  # We only keep the first instance of a hit in the first group
@@ -470,6 +390,7 @@ def get_cooccurrence_groups_mun(db_path, word_groups, level="sent", corpus_philo
     env.close()
 
 
+@jit(nopython=True)
 def compare_rows(row1, row2):
     for i in range(len(row1)):
         if row1[i] != row2[i]:
@@ -477,25 +398,46 @@ def compare_rows(row1, row2):
     return 0
 
 
-def merge_word_group(
-    txn,
-    db,
-    words: list[str],
-):
+@jit(nopython=True)
+def find_matching_indices_sorted(philo_id_array, philo_id_object, cooc_slice):
+    low = 0
+    high = len(philo_id_array) - 1
+    matching_indices = []
+
+    while low <= high:
+        mid = (low + high) // 2
+        current_row = philo_id_array[mid]
+
+        if np.all(current_row[:cooc_slice] == philo_id_object[:cooc_slice]):
+            # Match found, append index and check for more matches
+            matching_indices.append(mid)
+            high = mid - 1  # Search for more matches before the current index
+        else:
+            if compare_rows(current_row[:cooc_slice], philo_id_object[:cooc_slice]) == -1:
+                low = mid + 1  # Search in the higher half
+            else:
+                high = mid - 1  # Search in the lower half
+
+            # If a non-match is found after a series of matches, stop searching
+            if matching_indices and compare_rows(current_row[:cooc_slice], philo_id_object[:cooc_slice]) in (-1, 1):
+                break
+    return np.array(matching_indices)
+
+
+def merge_word_group(txn, db, words: list[str], chunk_size=None):
     # Initialize data structures for each word
-    start = time.time()
     word_data = {
         word: {"buffer": txn.get(word.encode("utf8"), db=db), "array": None, "index": 0, "start": 0} for word in words
     }
-    chunk_size = 36 * 10000  # 10000 hits: happy median between performance and memory usage, potentially reevaluate.
+    if chunk_size is None:
+        chunk_size = (
+            36 * 10000
+        )  # 10000 hits: happy median between performance and memory usage, potentially reevaluate.
 
     # Load initial chunks
     for word in words:
         # TODO: Only load 100 hits initially to quickly return results
-        word_data[word]["array"] = np.frombuffer(word_data[word]["buffer"][0:3600], dtype=">u4").reshape(-1, 9)
-
-    def is_greater(arr1, arr2):
-        return arr1[0] > arr2[0] or (arr1[0] == arr2[0] and arr1[1] > arr2[1])
+        word_data[word]["array"] = np.frombuffer(word_data[word]["buffer"][0:3600], dtype="u4").reshape(-1, 9)
 
     # Merge sort and write loop
     while any(word_data[word]["array"].size > 0 for word in words):
@@ -546,7 +488,7 @@ def merge_word_group(
         # Merge sort partial philo_id arrays
         combined_arrays = np.concatenate(
             [word_data[word]["array"][:index] for word, index in words_to_keep],
-            dtype=">u4",
+            dtype="u4",
         )
         sorted_indices = np.lexsort((combined_arrays[:, -1], combined_arrays[:, 0]))  # sort by doc id and byte offset
         yield combined_arrays[sorted_indices]
@@ -556,8 +498,13 @@ def merge_word_group(
             word_data[word]["start"] += word_data[word]["array"][:index].nbytes
             end = word_data[word]["start"] + chunk_size
             word_data[word]["array"] = np.frombuffer(
-                word_data[word]["buffer"][word_data[word]["start"] : end], dtype=">u4"
+                word_data[word]["buffer"][word_data[word]["start"] : end], dtype="u4"
             ).reshape(-1, 9)
+
+
+@jit(nopython=True)
+def is_greater(arr1, arr2):
+    return arr1[0] > arr2[0] or (arr1[0] == arr2[0] and arr1[1] > arr2[1])
 
 
 def get_corpus_philo_ids(corpus_file, byte_output=False) -> tuple[np.ndarray, int] | tuple[set[bytes], int]:
@@ -566,7 +513,7 @@ def get_corpus_philo_ids(corpus_file, byte_output=False) -> tuple[np.ndarray, in
         buffer = corpus.read(28)
         object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i))
         if byte_output is False:
-            return np.frombuffer(buffer + corpus.read(), dtype=">u4").reshape(-1, 7)[:, :object_level], object_level
+            return np.frombuffer(buffer + corpus.read(), dtype="u4").reshape(-1, 7)[:, :object_level], object_level
         else:
             object_level *= 4
             philo_ids = {buffer}
