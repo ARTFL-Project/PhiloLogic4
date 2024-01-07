@@ -106,7 +106,7 @@ def make_sentences_database(datadir, db_destination):
                     for line in input_file:
                         word_obj = loads(line.decode("utf8"))  # type: ignore
                         if word_obj["philo_type"] == "word":
-                            sentence_id = struct.pack(">6I", *map(int, word_obj["position"].split()[:6]))
+                            sentence_id = struct.pack("6I", *map(int, word_obj["position"].split()[:6]))
                             if sentence_id != current_sentence:
                                 if current_sentence is not None:
                                     txn.put(current_sentence, msgpack.dumps(words))
