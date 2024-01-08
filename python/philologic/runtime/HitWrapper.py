@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 """All different types of hit objects"""
 
-import sys
-
 TEXT_OBJECT_LEVELS = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 SHARED_CACHE = {}
 
@@ -20,6 +18,8 @@ def _safe_lookup(row, field):
 
 class HitWrapper:
     """Class representing an individual hit with all its ancestors"""
+
+    __slots__ = ["db", "hit", "object_type", "row", "bytes", "words", "philo_id", "page", "line", "ancestors"]
 
     def __init__(self, hit, db, obj_type=False, method="proxy"):
         self.db = db
@@ -104,6 +104,8 @@ class HitWrapper:
 class ObjectWrapper:
     """Class representing doc, div1, div2, div3, para, sent objects"""
 
+    __slots__ = ["db", "hit", "object_type", "row", "bytes", "words", "philo_id", "page"]
+
     def __init__(self, hit, db, obj_type=False, row=None):
         self.db = db
         self.hit = hit
@@ -145,6 +147,8 @@ class ObjectWrapper:
 class PageWrapper:
     """Class representing page objects"""
 
+    __slots__ = ["db", "philo_id", "object_type", "row", "bytes"]
+
     def __init__(self, id, db):
         self.db = db
         self.philo_id = id
@@ -168,6 +172,8 @@ class PageWrapper:
 
 class LineWrapper:
     """Class representing line objects"""
+
+    __slots__ = ["db", "philo_id", "object_type", "row", "bytes", "doc_id", "hit_offset"]
 
     def __init__(self, philo_id, byte_offset, db):
         self.db = db
@@ -195,6 +201,8 @@ class LineWrapper:
 class WordWrapper:
     """Class representing word objects"""
 
+    __slots__ = ["db", "philo_id", "object_type", "row", "byte"]
+
     def __init__(self, id, db, byte):
         self.db = db
         self.philo_id = id
@@ -202,9 +210,14 @@ class WordWrapper:
         self.row = None
         self.byte = byte
 
+    @property
+    def parent(self):
+        """Calculates and returns the parent value."""
+        return self.philo_id.split()[:6] + ["0"]
+
     def __getitem__(self, key):
         if key == "parent":
-            return self.philo_id.split()[:6] + ["0"]
+            return self.parent
         return ""
 
     def __getattr__(self, name):

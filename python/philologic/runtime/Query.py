@@ -324,6 +324,13 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
             else:
                 group_generators.append(merge_word_group(txn, db_words, words, chunk_size=36 * 1000))
 
+        if corpus_philo_ids is not None:
+            # Filter out philo_ids that are not in the corpus
+            first_group_data = first_group_data[
+                np.isin(first_group_data[:, :object_level], corpus_philo_ids).any(axis=1)
+            ]
+            print("HA", corpus_philo_ids, first_group_data, file=sys.stderr)
+
         group_data = [None for _ in range(len(word_groups) - 1)]  # Start with None for each group
         break_out = False
         previous_row = None
@@ -511,7 +518,7 @@ def get_corpus_philo_ids(corpus_file, byte_output=False) -> tuple[np.ndarray, in
     object_level = 0
     with open(corpus_file, "rb") as corpus:
         buffer = corpus.read(28)
-        object_level = len(tuple(i for i in struct.unpack(">7I", buffer) if i))
+        object_level = len(tuple(i for i in struct.unpack("7I", buffer) if i))
         if byte_output is False:
             return np.frombuffer(buffer + corpus.read(), dtype="u4").reshape(-1, 7)[:, :object_level], object_level
         else:
