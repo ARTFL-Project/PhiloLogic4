@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import multiprocessing
 import sqlite3
 import struct
 from itertools import product
@@ -50,38 +49,36 @@ def query(
     split = split_terms(grouped)
     words_per_hit = len(split)
     if not filename:
-        hfile = str(multiprocessing.current_process().pid) + ".hitlist"
+        hfile = str(os.getpid()) + ".hitlist"
     dir = db.path + "/hitlists/"
     filename = filename or (dir + hfile)
     if not os.path.exists(filename):
         Path(filename).touch()
     frequency_file = db.path + "/frequencies/normalized_word_frequencies"
+
     pid = os.fork()
     if pid == 0:  # In child process
         os.umask(0)
-        os.chdir(dir)
         os.setsid()
         pid = os.fork()
         if pid > 0:
             os._exit(0)
-        with open(f"{filename}.terms", "w") as terms_file:
-            expand_query_not(split, frequency_file, terms_file, True, False)
-        args = [
-            "philosearch",
-            f"--db_path={db.path}",
-            f"--hitlist={filename}",
-            f"--search_type={method}",
-            f"--level={object_level}",
-            f"--n={method_arg or 1}",
-            f"--exact_span={exact}",
-        ]
-        if corpus_file is not None:
-            args.append(f"--corpus_file={corpus_file}")
-        print(" ".join(args), file=sys.stderr)
-        subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ)
-        # std_out, std_err = worker.communicate()
+        else:
+            with open(f"{filename}.terms", "w") as terms_file:
+                expand_query_not(split, frequency_file, terms_file, True, False)
+            if method == "proxy":
+                search_word(db.path, filename, corpus_file=corpus_file)
+            elif method == "exact_phrase":
+                search_phrase(db.path, filename, corpus_file=corpus_file)
+            elif method == "cooc":
+                search_within_text_object(db.path, filename, object_level, corpus_file=corpus_file)
+            elif method == "phrase":
+                search_within_word_span(db.path, filename, method_arg or 1, bool(exact), corpus_file=corpus_file)
 
-        os._exit(0)  # Exit child process
+            with open(filename + ".done", "w") as flag:  # do something to mark query as finished
+                flag.write(" ".join(sys.argv) + "\n")
+                flag.flush()  # make sure the file is written to disk. Otherwise we get an infinite loop with 0 hits
+            os._exit(0)  # Exit child process
     else:
         hits = HitList.HitList(
             filename,
@@ -152,21 +149,18 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
                 output_file.write(txn.get(word.encode("utf8"), db=db))
             else:
                 corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
-                cursor = txn.cursor()
-                if cursor.set_key(words[0].encode("utf8")):
-                    full_array = np.frombuffer(cursor.value(), dtype="u4").reshape(-1, 9)
-                    masks = [np.all(full_array[:, :object_level] == row, axis=1) for row in corpus_philo_ids]
-                    combined_mask = np.any(np.stack(masks, axis=0), axis=0)
-                    output_file.write(full_array[combined_mask].tobytes())
+                philo_ids = np.frombuffer(txn.get(word.encode("utf8"), db=db), dtype="u4").reshape(-1, 9)
+                matching_indices = np.isin(philo_ids[:, :object_level], corpus_philo_ids).any(axis=1)
+                output_file.write(philo_ids[matching_indices].tobytes())
     else:
         with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
             db = env.open_db(b"words", txn=txn)
             for philo_ids in merge_word_group(txn, db, words):
                 if corpus_philo_ids is not None:
-                    masks = [np.all(philo_ids[:, :object_level] == row, axis=1) for row in corpus_philo_ids]
-                    combined_mask = np.any(np.stack(masks, axis=0), axis=0)
-                    output_file.write(philo_ids[combined_mask].tobytes())
-                output_file.write(philo_ids.tobytes())
+                    matching_indices = np.isin(philo_ids[:, :object_level], corpus_philo_ids).any(axis=1)
+                    output_file.write(philo_ids[matching_indices].tobytes())
+                else:
+                    output_file.write(philo_ids.tobytes())
     env.close()
 
 
@@ -207,18 +201,18 @@ def search_phrase(db_path, hitlist_filename, corpus_file=None):
             #         if next_byte_index < len(byte_streams[word_index]):
             #             next_philo_id = byte_streams[word_index][next_byte_index : next_byte_index + philo_id_length]
             #             heapq.heappush(pq, (next_philo_id, word_index + 1, next_byte_index))
-    else:
-        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
-        with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb", buffering=900) as output_file:
-            cursor = conn.cursor()
-            cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
-            for (philo_ids,) in cursor:
-                philo_ids = extract_philo_ids(philo_ids, 36)
-                for i, philo_id in enumerate(philo_ids):
-                    if i == len(philo_ids) - 1:
-                        output_file.write(philo_id)
-                    else:
-                        next_philo_id = philo_ids[i]
+        # else:
+        # corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
+        # with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb", buffering=900) as output_file:
+        #     cursor = conn.cursor()
+        #     cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
+        #     for (philo_ids,) in cursor:
+        #         philo_ids = extract_philo_ids(philo_ids, 36)
+        #         for i, philo_id in enumerate(philo_ids):
+        #             if i == len(philo_ids) - 1:
+        #                 output_file.write(philo_id)
+        #             else:
+        #                 next_philo_id = philo_ids[i]
 
 
 def search_within_word_span(db_path, hitlist_filename, n, exact_distance, corpus_file=None):
@@ -288,12 +282,6 @@ def get_word_groups(terms_file):
         if word_group:
             word_groups.append(word_group)
     return word_groups
-
-
-def extract_philo_ids(philo_ids: bytes, byte_length):
-    """Generator that yields 36-byte long philo_ids from the byte sequence"""
-    for start_byte in range(0, len(philo_ids), byte_length):
-        yield philo_ids[start_byte : start_byte + byte_length]
 
 
 def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None):
@@ -443,7 +431,6 @@ def merge_word_group(txn, db, words: list[str], chunk_size=None):
 
     # Load initial chunks
     for word in words:
-        # TODO: Only load 100 hits initially to quickly return results
         word_data[word]["array"] = np.frombuffer(word_data[word]["buffer"][0:3600], dtype="u4").reshape(-1, 9)
 
     # Merge sort and write loop
@@ -456,6 +443,9 @@ def merge_word_group(txn, db, words: list[str], chunk_size=None):
 
         # Which word finishes first?
         first_word_to_finish, _, first_finishing_row = sorted(words_first_last_row, key=lambda x: (x[2][0], x[2][1]))[0]
+
+        def is_greater(arr1, arr2):
+            return arr1[0] > arr2[0] or (arr1[0] == arr2[0] and arr1[1] > arr2[1])
 
         # Determine which words start before the first finishing word ends
         # Save index of first row that exceeds the first finishing word
@@ -509,25 +499,12 @@ def merge_word_group(txn, db, words: list[str], chunk_size=None):
             ).reshape(-1, 9)
 
 
-@jit(nopython=True)
-def is_greater(arr1, arr2):
-    return arr1[0] > arr2[0] or (arr1[0] == arr2[0] and arr1[1] > arr2[1])
-
-
-def get_corpus_philo_ids(corpus_file, byte_output=False) -> tuple[np.ndarray, int] | tuple[set[bytes], int]:
+def get_corpus_philo_ids(corpus_file) -> tuple[np.ndarray, int]:
     object_level = 0
     with open(corpus_file, "rb") as corpus:
         buffer = corpus.read(28)
         object_level = len(tuple(i for i in struct.unpack("7I", buffer) if i))
-        if byte_output is False:
-            return np.frombuffer(buffer + corpus.read(), dtype="u4").reshape(-1, 7)[:, :object_level], object_level
-        else:
-            object_level *= 4
-            philo_ids = {buffer}
-            corpus = corpus.read()
-            for philo_id in extract_philo_ids(corpus, 28):
-                philo_ids.add(philo_id)
-            return philo_ids, object_level
+        return np.frombuffer(buffer + corpus.read(), dtype="u4").reshape(-1, 7)[:, :object_level], object_level
 
 
 def expand_query_not(split, freq_file, dest_fh, ascii_conversion, lowercase=True):

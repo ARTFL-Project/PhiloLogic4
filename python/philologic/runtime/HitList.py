@@ -44,10 +44,6 @@ class HitList(object):
         else:
             self.has_word_id = 0  # unfortunately.  fix this next time I have 3 months to spare.
             self.length = 7 + 2 * (words)
-        while os.stat(self.filename).st_size == 0:
-            if os.path.exists(self.filename + ".done"):  # if the file is empty and the .done file exists, we're done.
-                break
-            time.sleep(0.005)
         self.fh = open(self.filename, "rb")  # need a full path here.
         self.format = "%dI" % self.length  # short for object id's, int for byte offset.
         self.hitsize = struct.calcsize(self.format)
@@ -56,6 +52,7 @@ class HitList(object):
         self.position = 0
         self.done = False
         self.update()
+
         if self.sort_order:
             self.sorted_hitlist = []
             iter_position = 0
@@ -174,7 +171,7 @@ class HitList(object):
                 if self.done:
                     raise IndexError
                 else:
-                    time.sleep(0.01)
+                    time.sleep(0.05)
                     self.update()
             offset = self.hitsize * n
             self.fh.seek(offset)
@@ -206,7 +203,6 @@ class HitList(object):
             if self.done:
                 raise IndexError
             else:
-                time.sleep(0.05)
                 self.update()
         if n != self.position:
             offset = self.hitsize * n
