@@ -55,7 +55,7 @@ def query(
     if not os.path.exists(filename):
         Path(filename).touch()
     frequency_file = db.path + "/frequencies/normalized_word_frequencies"
-
+    print("HEY", method, method_arg, exact, file=sys.stderr)
     pid = os.fork()
     if pid == 0:  # In child process
         os.umask(0)
@@ -226,25 +226,19 @@ def search_within_word_span(db_path, hitlist_filename, n, exact_distance, corpus
         db_path, word_groups, corpus_philo_ids=corpus_philo_ids, object_level=object_level
     )
 
-    def generate_philo_ids(byte_sequence) -> Iterator[bytes]:
-        """Generator that yields 36-byte long philo_ids from the byte sequence"""
-        for i in range(0, len(byte_sequence), 36):
-            yield byte_sequence[i : i + 36]
-
     if exact_distance is True:
         comp = eq  # distance between words equals n
     else:
         comp = le  # distance between words is less than or equal to n
     with open(hitlist_filename, "wb") as output_file:
-        for group in common_object_ids:
-            philo_id_groups = (generate_philo_ids(group[i]) for i in range(len(group)))
+        for philo_id_groups in common_object_ids:
             for group_combination in product(*philo_id_groups):
                 # we now need to check if the positions are within n words of each other
-                positions: list[int] = [struct.unpack(">1I", philo_id[28:32])[0] for philo_id in group_combination]
+                positions: list[int] = [philo_id[7:8][0] for philo_id in group_combination]
                 if comp(max(positions) - min(positions), n):
-                    starting_id = group_combination[0]
+                    starting_id = group_combination[0].tobytes()
                     for group_num in range(1, len(word_groups)):
-                        starting_id += group_combination[group_num][28:36]
+                        starting_id += group_combination[group_num][7:].tobytes()
                     output_file.write(starting_id)
 
 
@@ -260,11 +254,9 @@ def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None
     )
     with open(hitlist_filename, "wb") as output_file:
         for group in common_object_ids:
-            starting_id = group[0][:36]
-            for philo_ids in group[1:]:
-                for i in range(0, len(philo_ids), 36):
-                    starting_id += philo_ids[i + 28 : i + 32] + philo_ids[i + 32 : i + 36]
-                    break  # we only keep one philo_id per group: we are replicating the limitation of the old core
+            starting_id = group[0].tobytes()
+            for philo_id in group[1:]:
+                starting_id += philo_id[7:].tobytes()
             output_file.write(starting_id)
 
 
@@ -317,14 +309,17 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
             first_group_data = first_group_data[
                 np.isin(first_group_data[:, :object_level], corpus_philo_ids).any(axis=1)
             ]
-            print("HA", corpus_philo_ids, first_group_data, file=sys.stderr)
 
         group_data = [None for _ in range(len(word_groups) - 1)]  # Start with None for each group
         break_out = False
         previous_row = None
+        match = True
         for index in first_group_data:
             philo_id_object = index[:cooc_slice]
             if previous_row is not None and compare_rows(philo_id_object, previous_row) == 0:
+                if match is True:
+                    results[-1] = index.reshape(-1, 9)  # replace the previous row with the current row
+                    yield tuple(results)
                 continue
             results = []
             match = True
@@ -372,14 +367,12 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
                     else:
                         group_data[group_index] = philo_id_array[matching_indices[-1] + 1 :]  # slice off matching rows
 
-                results.append(
-                    matching_rows[0].tobytes()
-                )  # We only keep the first instance of a hit in the first group
+                results.append(matching_rows)  # We only keep the first instance of a hit in the first group
 
             if break_out is True:
                 break
             elif match is True:
-                results.append(index.tobytes())  # We only keep the first instance of a hit in the first group
+                results.append(index.reshape(-1, 9))  # We only keep the first instance of a hit in the first group
                 yield tuple(results)
 
     env.close()

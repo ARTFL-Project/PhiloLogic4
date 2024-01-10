@@ -19,7 +19,7 @@ setup(
         "philologic.runtime.reports",
         "philologic.loadtime",
     ],
-    scripts=["scripts/philoload4", "scripts/philosearch"],
+    scripts=["scripts/philoload4"],
     install_requires=[
         "regex",
         "lxml",
