@@ -78,25 +78,31 @@ def collocation_results(request, config):
             parent_sentence = hit[:24]  # 24 bytes for the first 6 integers
             sentence = cursor.get(parent_sentence)
             word_objects = msgpack.loads(sentence)
-            if parent_sentence != stored_sentence_id:
-                sentence_hit_count = 1
-                stored_sentence_id = parent_sentence
-                stored_sentence_counts = {}
-                for collocate, _, _ in word_objects:
-                    if collocate not in filter_list:  # TODO: check if removing filtered words at the end is faster
-                        if collocate not in stored_sentence_counts:
-                            stored_sentence_counts[collocate] = 1
-                        else:
-                            stored_sentence_counts[collocate] += 1
-            else:
-                sentence_hit_count += 1
-            for word in stored_sentence_counts:
-                if stored_sentence_counts[word] < sentence_hit_count:
-                    continue
-                if word not in all_collocates:
-                    all_collocates[word] = {"count": 1}
-                else:
-                    all_collocates[word]["count"] += 1
+            # if parent_sentence != stored_sentence_id:
+            #     sentence_hit_count = 1
+            #     stored_sentence_id = parent_sentence
+            #     stored_sentence_counts = {}
+            #     for collocate, _, _ in word_objects:
+            #         if collocate not in filter_list:  # TODO: check if removing filtered words at the end is faster
+            #             if collocate not in stored_sentence_counts:
+            #                 stored_sentence_counts[collocate] = 1
+            #             else:
+            #                 stored_sentence_counts[collocate] += 1
+            # else:
+            #     sentence_hit_count += 1
+            # for word in stored_sentence_counts:
+            #     if stored_sentence_counts[word] < sentence_hit_count:
+            #         continue
+            #     if word not in all_collocates:
+            #         all_collocates[word] = {"count": 1}
+            #     else:
+            #         all_collocates[word]["count"] += 1
+            for collocate, _, _ in word_objects:
+                if collocate not in filter_list:
+                    if collocate not in all_collocates:
+                        all_collocates[collocate] = {"count": 1}
+                    else:
+                        all_collocates[collocate]["count"] += 1
             hits_done += 1
 
             elapsed = timeit.default_timer() - start_time

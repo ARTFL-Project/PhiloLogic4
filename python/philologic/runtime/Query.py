@@ -253,11 +253,12 @@ def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None
         db_path, word_groups, level=level, corpus_philo_ids=corpus_philo_ids, object_level=object_level
     )
     with open(hitlist_filename, "wb") as output_file:
-        for group in common_object_ids:
-            starting_id = group[0].tobytes()
-            for philo_id in group[1:]:
-                starting_id += philo_id[7:].tobytes()
-            output_file.write(starting_id)
+        for philo_id_groups in common_object_ids:
+            for group_combination in product(*philo_id_groups):
+                starting_id = group_combination[0].tobytes()
+                for group_num in range(1, len(word_groups)):
+                    starting_id += group_combination[group_num][7:].tobytes()
+                output_file.write(starting_id)
 
 
 def get_word_groups(terms_file):
