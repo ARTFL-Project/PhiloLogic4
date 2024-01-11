@@ -58,9 +58,6 @@ def collocation_results(request, config):
     query_words = set(query_words)
     filter_list = filter_list.union(query_words)
 
-    stored_sentence_id = None
-    stored_sentence_counts = {}
-    sentence_hit_count = 1
     hits_done = request.start or 0
     max_time = request.max_time or 2
     all_collocates = {}
@@ -79,16 +76,6 @@ def collocation_results(request, config):
             sentence = cursor.get(parent_sentence)
             word_objects = msgpack.loads(sentence)
             for collocate, _, _ in word_objects:
-                if collocate == "obtain":
-                    import sys, struct
-
-                    print(
-                        struct.unpack("6I", parent_sentence),
-                        " ".join(w for w, _, _ in word_objects),
-                        "\n",
-                        file=sys.stderr,
-                    )
-
                 if collocate not in filter_list:
                     if collocate not in all_collocates:
                         all_collocates[collocate] = {"count": 1}
