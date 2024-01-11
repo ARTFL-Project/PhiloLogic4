@@ -18,11 +18,13 @@ import regex as re
 from philologic.runtime import HitList
 from philologic.runtime.QuerySyntax import group_terms, parse_query
 from unidecode import unidecode
-from numba import jit
+import numba
 
+numba.config.CACHE_DIR = "/tmp/numba"
 
 OBJECT_LEVEL = {"para": 5, "sent": 6}
 os.environ["PATH"] += ":/usr/local/bin/"
+# os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
 
 
 def query(
@@ -55,7 +57,6 @@ def query(
     if not os.path.exists(filename):
         Path(filename).touch()
     frequency_file = db.path + "/frequencies/normalized_word_frequencies"
-    print("HEY", method, method_arg, exact, file=sys.stderr)
     pid = os.fork()
     if pid == 0:  # In child process
         os.umask(0)
@@ -379,7 +380,7 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
     env.close()
 
 
-@jit(nopython=True)
+@numba.jit(nopython=True, cache=True)
 def compare_rows(row1, row2):
     for i in range(len(row1)):
         if row1[i] != row2[i]:
@@ -387,29 +388,32 @@ def compare_rows(row1, row2):
     return 0
 
 
-@jit(nopython=True)
+@numba.jit(nopython=True, cache=True)
 def find_matching_indices_sorted(philo_id_array, philo_id_object, cooc_slice):
+    matching_indices = []
     low = 0
     high = len(philo_id_array) - 1
-    matching_indices = []
 
     while low <= high:
         mid = (low + high) // 2
-        current_row = philo_id_array[mid]
+        current_row = philo_id_array[mid][:cooc_slice]
 
-        if np.all(current_row[:cooc_slice] == philo_id_object[:cooc_slice]):
-            # Match found, append index and check for more matches
+        comparison = compare_rows(current_row, philo_id_object)
+
+        if comparison == 0:
+            # Match found, append index
             matching_indices.append(mid)
-            high = mid - 1  # Search for more matches before the current index
+            # Roll back as long as consecutive matches exist
+            rollback = mid - 1
+            while rollback >= low and compare_rows(philo_id_array[rollback][:cooc_slice], philo_id_object) == 0:
+                matching_indices.append(rollback)
+                rollback -= 1
+            low = mid + 1  # Continue searching in the higher half
+        elif comparison < 0:
+            low = mid + 1  # Search in the higher half
         else:
-            if compare_rows(current_row[:cooc_slice], philo_id_object[:cooc_slice]) == -1:
-                low = mid + 1  # Search in the higher half
-            else:
-                high = mid - 1  # Search in the lower half
-
-            # If a non-match is found after a series of matches, stop searching
-            if matching_indices and compare_rows(current_row[:cooc_slice], philo_id_object[:cooc_slice]) in (-1, 1):
-                break
+            high = mid - 1  # Search in the lower half
+    matching_indices.sort()
     return np.array(matching_indices)
 
 
