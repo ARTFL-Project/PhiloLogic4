@@ -5,6 +5,7 @@ import os
 import sys
 import timeit
 from wsgiref.handlers import CGIHandler
+import struct
 
 import lz4.frame
 import msgpack
@@ -12,6 +13,7 @@ import orjson
 import regex as re
 from philologic.runtime.DB import DB
 from unidecode import unidecode
+import lmdb
 
 sys.path.append("..")
 import custom_functions
@@ -50,7 +52,9 @@ def get_neighboring_words(environ, start_response):
         and request.second_kwic_sorting_option in ("left", "right", "q", "")
         and request.third_kwic_sorting_option in ("left", "right", "q", "")
     ):  # fast path
-        hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
+        hits = db.query(
+            request["q"], request["method"], request["arg"], raw_results=True, raw_bytes=True, **request.metadata
+        )
     else:
         metadata_search = True
         hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
@@ -62,37 +66,44 @@ def get_neighboring_words(environ, start_response):
         if not os.path.exists(cache_path):
             with open(cache_path, "w") as cache_file:
                 print("\t".join(fields), file=cache_file)
-        cursor = db.dbh.cursor()
-        with open(cache_path, "a") as cache_file:
+
+        env = lmdb.open(
+            os.path.join(db.path, "sentences.lmdb"),
+            readonly=True,
+            lock=False,
+        )
+        with open(cache_path, "a") as cache_file, env.begin() as txn:
+            cursor = txn.cursor()
             for hit in hits[index:]:
                 if metadata_search is False:
-                    remaining = list(hit[7:])
+                    remaining = hit[28:]  # 28 bytes for the first 7 integers
                     offsets = []
                     while remaining:
-                        remaining.pop(0)
+                        remaining = remaining[4:]  # remove first 4 bytes corresponding to one 32-bit integer
                         if remaining:
-                            offsets.append(remaining.pop(0))
+                            offset = int.from_bytes(remaining[:4], "little", signed=False)  # get first integer
+                            remaining = remaining[4:]  # remove first integer
+                            offsets.append(offset)
                     offsets.sort()
-                    sentence = f"{hit[0]} {hit[1]} {hit[2]} {hit[3]} {hit[4]} {hit[5]} 0"
+                    sentence = hit[:24]  # 24 bytes for the first 6 integers
                 else:
                     offsets = hit.bytes
-                    sentence = f"{hit.hit[0]} {hit.hit[1]} {hit.hit[2]} {hit.hit[3]} {hit.hit[4]} {hit.hit[5]} 0"
-                cursor.execute("SELECT words FROM sentences WHERE philo_id = ?", (sentence,))
-                words = msgpack.loads(lz4.frame.decompress(cursor.fetchone()[0]))
+                    sentence = struct.pack("6I", *hit.hit[:6])
+                words = msgpack.loads(cursor.get(sentence))
                 left_side_text = []
                 right_side_text = []
                 query_words = []
-                for word in words:
-                    if NUMBER.search(word["word"]):
+                for word, _, start_byte in words:
+                    if NUMBER.search(word):
                         continue
                     if db.locals.ascii_conversion is True:
-                        word["word"] = unidecode(word["word"])
-                    if offsets[0] > word["start_byte"]:
-                        left_side_text.append(word["word"])
-                    elif word["start_byte"] > offsets[-1]:
-                        right_side_text.append(word["word"])
+                        word = unidecode(word)
+                    if offsets[0] > start_byte:
+                        left_side_text.append(word)
+                    elif start_byte > offsets[-1]:
+                        right_side_text.append(word)
                     else:
-                        query_words.append(word["word"])
+                        query_words.append(word)
                 left_side_text = left_side_text[-10:]
                 left_side_text.reverse()
                 if not left_side_text:

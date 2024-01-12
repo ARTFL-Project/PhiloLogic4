@@ -3,14 +3,11 @@
 
 import os
 import timeit
-import string
 import msgpack
 import lmdb
 
 from philologic.runtime.DB import DB
 from philologic.runtime.Query import get_expanded_query
-
-remove_punctuation_map = dict((ord(char), None) for char in string.punctuation if char != "'")
 
 
 def collocation_results(request, config):
@@ -69,13 +66,23 @@ def collocation_results(request, config):
         readonly=True,
         lock=False,
     )
+
+    # We turn on lemma counting if the query word is a lemma search
+    if "lemma:" in request["q"]:
+        count_lemmas = True
+    else:
+        count_lemmas = False
     with env.begin() as txn:
         cursor = txn.cursor()
         for hit in hits[hits_done:]:
             parent_sentence = hit[:24]  # 24 bytes for the first 6 integers
             sentence = cursor.get(parent_sentence)
             word_objects = msgpack.loads(sentence)
-            for collocate, _, _ in word_objects:
+            if count_lemmas is False:
+                words = [word for word, _, _ in word_objects]
+            else:
+                words = [lemma for _, lemma, _ in word_objects]
+            for collocate in words:
                 if collocate not in filter_list:
                     if collocate not in all_collocates:
                         all_collocates[collocate] = {"count": 1}

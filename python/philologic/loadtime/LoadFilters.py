@@ -48,21 +48,17 @@ def generate_words_sorted(loader_obj, text):
     os.system(wordcommand)
 
 
-def get_lemmas(loader_obj, text):
+def get_lemmas(_, text):
     """Get lemmas for each word"""
-    if loader_obj.lemmas:
-        with open(text["raw"] + ".lemma", "w", encoding="utf8") as lemma_file:
-            with open(text["raw"], encoding="utf8") as fh:
-                for line in fh:
-                    philo_type, word, philo_id, attribs = line.split("\t")
-                    if philo_type != "word":
-                        continue
-                    if loader_obj.lemmas:
-                        word = word.lower()
-                        print(f"lemma\t{loader_obj.lemmas.get(word, word)}\t{philo_id}", file=lemma_file)
-                    else:
-                        attribs = loads(attribs)
-                        print(f"lemma\t{attribs.get('lemma', word)}\tphilo_id", file=lemma_file)
+    with open(text["raw"] + ".lemma", "w", encoding="utf8") as lemma_file:
+        with open(text["raw"], encoding="utf8") as fh:
+            for line in fh:
+                philo_type, _, philo_id, attribs = line.split("\t")
+                if philo_type != "word":
+                    continue
+                attribs = loads(attribs)
+                if "lemma" in attribs:
+                    print(f"lemma\t{attribs['lemma']}\t{philo_id}", file=lemma_file)
     os.system(f"lz4 -z -q {text['raw']}.lemma {text['raw']}.lemma.lz4 && rm {text['raw']}.lemma")
 
 
@@ -287,15 +283,16 @@ def store_words_and_philo_ids(loader_obj, text):
                         attrib["start_byte"] = attrib["end_byte"] - len(
                             word.encode("utf8")
                         )  # Parser uses beginning of sent as start_byte
-                    word_obj = dumps(
-                        {
-                            "token": word,
-                            "position": philo_id,
-                            "start_byte": attrib["start_byte"],
-                            "end_byte": attrib["end_byte"],
-                            "philo_type": philo_type,
-                        }
-                    ).decode("utf-8")
+                    word_obj = {
+                        "token": word,
+                        "position": philo_id,
+                        "start_byte": attrib["start_byte"],
+                        "end_byte": attrib["end_byte"],
+                        "philo_type": philo_type,
+                    }
+                    if "lemma" in attrib:
+                        word_obj["lemma"] = attrib["lemma"]
+                    word_obj = dumps(word_obj).decode("utf-8")
                     print(word_obj, file=output)
     with open(f"{filename}.lz4", "wb") as compressed_file:
         with open(filename, "rb") as input_file:

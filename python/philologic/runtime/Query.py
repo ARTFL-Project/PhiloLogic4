@@ -137,26 +137,20 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
     corpus_philo_ids, object_level = None, None
     if corpus_file is not None:
         corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
-    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False, max_dbs=2)
+    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, readahead=False)
     if len(words) == 1:
         with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
-            if words[0].startswith("lemma:"):
-                db = env.open_db(b"lemmas", txn=txn)
-                word = words[0][6:]
-            else:
-                db = env.open_db(b"words", txn=txn)
-                word = words[0]
+            word = words[0]
             if corpus_file is None:
-                output_file.write(txn.get(word.encode("utf8"), db=db))
+                output_file.write(txn.get(word.encode("utf8")))
             else:
                 corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
-                philo_ids = np.frombuffer(txn.get(word.encode("utf8"), db=db), dtype="u4").reshape(-1, 9)
+                philo_ids = np.frombuffer(txn.get(word.encode("utf8")), dtype="u4").reshape(-1, 9)
                 matching_indices = np.isin(philo_ids[:, :object_level], corpus_philo_ids).any(axis=1)
                 output_file.write(philo_ids[matching_indices].tobytes())
     else:
         with env.begin(buffers=True) as txn, open(hitlist_filename, "wb") as output_file:
-            db = env.open_db(b"words", txn=txn)
-            for philo_ids in merge_word_group(txn, db, words):
+            for philo_ids in merge_word_group(txn, words):
                 if corpus_philo_ids is not None:
                     matching_indices = np.isin(philo_ids[:, :object_level], corpus_philo_ids).any(axis=1)
                     output_file.write(philo_ids[matching_indices].tobytes())
@@ -282,16 +276,14 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
     cooc_slice = 6
     if level == "para":
         cooc_slice = 5
-    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False, max_dbs=2)
+    env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
     with env.begin(buffers=True) as txn:
-        db_words = env.open_db(b"words", txn=txn)
-
         # Determine which group has the smallest byte size
         byte_size_per_group = []
         for group in word_groups:
             byte_size = 0
             for word in group:
-                byte_size += len(txn.get(word.encode("utf8"), db=db_words))
+                byte_size += len(txn.get(word.encode("utf8")))
             byte_size_per_group.append(byte_size)
         # Perform an argsort on the list to get the indices of the groups sorted by byte size
         sorted_indices = np.argsort(byte_size_per_group)
@@ -302,9 +294,9 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent", corpus_philo_ids
         for index in sorted_indices:
             words = word_groups[index]
             if index == sorted_indices[0]:  # grab the entire first group
-                first_group_data = np.concatenate([i for i in merge_word_group(txn, db_words, words)], dtype="u4")
+                first_group_data = np.concatenate([i for i in merge_word_group(txn, words)], dtype="u4")
             else:
-                group_generators.append(merge_word_group(txn, db_words, words, chunk_size=36 * 1000))
+                group_generators.append(merge_word_group(txn, words, chunk_size=36 * 1000))
 
         if corpus_philo_ids is not None:
             # Filter out philo_ids that are not in the corpus
@@ -417,10 +409,10 @@ def find_matching_indices_sorted(philo_id_array, philo_id_object, cooc_slice):
     return np.array(matching_indices)
 
 
-def merge_word_group(txn, db, words: list[str], chunk_size=None):
+def merge_word_group(txn, words: list[str], chunk_size=None):
     # Initialize data structures for each word
     word_data = {
-        word: {"buffer": txn.get(word.encode("utf8"), db=db), "array": None, "index": 0, "start": 0} for word in words
+        word: {"buffer": txn.get(word.encode("utf8")), "array": None, "index": 0, "start": 0} for word in words
     }
     if chunk_size is None:
         chunk_size = (

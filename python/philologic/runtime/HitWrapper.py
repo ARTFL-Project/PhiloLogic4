@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 """All different types of hit objects"""
 
 TEXT_OBJECT_LEVELS = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
@@ -53,7 +52,7 @@ class HitWrapper:
             self.words.sort(key=lambda x: x[-1])  # assumes words in same sent, as does search4
             self.words = [WordWrapper(word, db, byte) for word, byte in zip(self.words, self.bytes)]
             page_i = self.hit[6]
-        page_id = [self.hit[0], 0, 0, 0, 0, 0, 0, 0, page_i]
+        page_id = (self.hit[0], 0, 0, 0, 0, 0, 0, 0, page_i)
         self.page = PageWrapper(page_id, db)
         self.ancestors = {}
         for object_type in TEXT_OBJECT_LEVELS:
@@ -123,7 +122,7 @@ class ObjectWrapper:
         self.row = row
         self.words = []
         page_i = self["page"]
-        page_id = [self.hit[0], 0, 0, 0, 0, 0, 0, 0, page_i]
+        page_id = (self.hit[0], 0, 0, 0, 0, 0, 0, 0, page_i)
         self.page = PageWrapper(page_id, db)
 
     def __getitem__(self, key):
@@ -186,7 +185,7 @@ class LineWrapper:
 
     def __getitem__(self, key):
         if self.row is None:
-            self.row = self.db.get_line(self.hit_offset, self.doc_id)
+            self.row = self.db.get_page(self.hit_offset, self.doc_id)
         return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):

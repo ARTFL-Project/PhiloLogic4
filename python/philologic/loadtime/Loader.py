@@ -111,7 +111,7 @@ class Loader:
     url_root = ""
     cores = 2
     ascii_conversion = ASCII_CONVERSION
-    lemmas = {}
+    lemmas = None
     # word_attributes = []
 
     @classmethod
@@ -132,11 +132,12 @@ class Loader:
         cls.ascii_conversion = loader_options["ascii_conversion"]
         cls.metadata_sql_types = loader_options["metadata_sql_types"]
         # cls.word_attributes = loader_options["word_attributes"]
-        cls.lemmas = {}
-        with open(loader_options["lemma_file"], encoding="utf8") as lemma_file:
-            for line in lemma_file:
-                word, lemma = line.strip().split("\t")
-                cls.lemmas[word] = lemma
+        if loader_options["lemma_file"]:
+            cls.lemmas = {}
+            with open(loader_options["lemma_file"], encoding="utf8") as lemma_file:
+                for line in lemma_file:
+                    word, lemma = line.strip().split("\t")
+                    cls.lemmas[word] = lemma
         for option in PARSER_OPTIONS:
             try:
                 cls.parser_config[option] = loader_options[option]
@@ -568,6 +569,7 @@ class Loader:
                 metadata_to_parse=cls.parser_config["metadata_to_parse"],
                 words_to_index=cls.words_to_index,
                 file_type=cls.parser_config["file_type"],
+                lemmas=cls.lemmas,
                 **options,
             )
             with open(text["newpath"], "r", newline="", encoding="utf8") as input_file:
@@ -718,16 +720,13 @@ class Loader:
         )
         line_count = int(line_count_process.stdout.strip())
         db_env = lmdb.open(
-            f"{self.destination}/words.lmdb", map_size=2 * 1024 * 1024 * 1024 * 1024, max_dbs=2, writemap=True
+            f"{self.destination}/words.lmdb", map_size=2 * 1024 * 1024 * 1024 * 1024, writemap=True
         )  # 2TB limit
 
-        db_words = db_env.open_db(b"words")
-        db_lemmas = db_env.open_db(b"lemmas")
         with lz4.frame.open(f"{self.workdir}/all_words_sorted.lz4") as input_file:
             current_word = None
             count = 0
             current_word = None
-            current_sent_id = None
             philo_ids = bytearray()
             txn = db_env.begin(write=True)
             for line in tqdm(input_file, total=line_count, desc="Creating word index"):
@@ -741,7 +740,6 @@ class Loader:
                         txn.put(
                             current_word.encode("utf-8"),
                             philo_ids,
-                            db=db_words,
                         )
                         count += 1
                         if count % commit_interval == 0:
@@ -756,7 +754,6 @@ class Loader:
                 txn.put(
                     current_word.encode("utf-8"),  # type: ignore
                     philo_ids,
-                    db=db_words,
                 )
             txn.commit()
 
@@ -765,7 +762,6 @@ class Loader:
             print("Creating lemma index...", end=" ", flush=True)
             with lz4.frame.open(f"{self.workdir}/all_lemmas_sorted.lz4", "rb") as input_file:
                 txn = db_env.begin(write=True)
-                lemma_per_form = {}
                 current_lemma = None
                 count = 0
                 philo_ids = bytearray()
@@ -778,9 +774,8 @@ class Loader:
                     if lemma != current_lemma:
                         if current_lemma is not None:
                             txn.put(
-                                current_lemma.encode("utf-8"),
+                                f"lemma:{current_lemma}".encode("utf-8"),
                                 philo_ids,
-                                db=db_lemmas,
                             )
                             count += 1
                             if count % commit_interval == 0:
@@ -792,9 +787,8 @@ class Loader:
                 # Commit any remaining lemmas
                 if philo_ids:
                     txn.put(
-                        current_lemma.encode("utf-8"),
+                        f"lemma:{current_lemma}".encode("utf-8"),
                         philo_ids,
-                        db=db_lemmas,
                     )
         db_env.close()
         print("Finished creating inverted index.")

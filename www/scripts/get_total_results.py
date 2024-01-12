@@ -20,6 +20,8 @@ try:
 except ImportError:
     from philologic.runtime import WSGIHandler
 
+import time
+
 
 def get_total_results(environ, start_response):
     status = "200 OK"

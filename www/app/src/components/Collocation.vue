@@ -1,10 +1,7 @@
 <template>
     <div class="container-fluid mt-4">
-        <results-summary
-            :description="results.description"
-            :running-total="runningTotal"
-            :filter-list="filterList"
-        ></results-summary>
+        <results-summary :description="results.description" :running-total="runningTotal"
+            :filter-list="filterList"></results-summary>
         <div class="row mt-4 pe-1" style="padding: 0 0.5rem" v-if="resultsLength">
             <div class="col-12 col-sm-4">
                 <div class="card shadow-sm">
@@ -16,12 +13,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr
-                                style="line-height: 2rem"
-                                v-for="word in sortedList"
-                                :key="word.collocate"
-                                @click="collocTableClick(word)"
-                            >
+                            <tr style="line-height: 2rem" v-for="word in sortedList" :key="word.collocate"
+                                @click="collocTableClick(word)">
                                 <td class="text-view">{{ word.collocate }}</td>
                                 <td>{{ word.count }}</td>
                             </tr>
@@ -32,14 +25,8 @@
             <div class="col-12 col-sm-8">
                 <div class="card p-3 shadow-sm">
                     <div class="card-text">
-                        <span
-                            class="cloud-word text-view"
-                            v-for="word in collocCloudWords"
-                            :key="word.word"
-                            :style="getWordCloudStyle(word)"
-                            @click="collocTableClick(word)"
-                            >{{ word.collocate }}</span
-                        >
+                        <span class="cloud-word text-view" v-for="word in collocCloudWords" :key="word.word"
+                            :style="getWordCloudStyle(word)" @click="collocTableClick(word)">{{ word.collocate }}</span>
                     </div>
                 </div>
             </div>
@@ -182,7 +169,9 @@ export default {
             var collocates = this.mergeResults(fullResults, data.collocates);
             let sortedList = [];
             for (let word of collocates.sorted.slice(0, 100)) {
-                sortedList.push({ collocate: word.label, count: word.count });
+                let collocate = `${word.label}`.replace(/lemma:/, "");
+                let surfaceForm = word.label;
+                sortedList.push({ collocate: collocate, surfaceForm: surfaceForm, count: word.count });
             }
             this.sortedList = sortedList;
             this.buildWordCloud();
@@ -209,11 +198,18 @@ export default {
             this.searching = false;
         },
         collocTableClick(item) {
+            let q
+            console.log(item)
+            if (item.surfaceForm.startsWith("lemma:")) {
+                q = `${this.q} ${item.surfaceForm}`;
+            } else {
+                q = `${this.q} "${item.surfaceForm}"`;
+            }
             this.$router.push(
                 this.paramsToRoute({
                     ...this.$store.state.formData,
                     report: "concordance",
-                    q: `${this.q} "${item.collocate}"`,
+                    q: q,
                     method: "cooc",
                 })
             );
@@ -236,6 +232,7 @@ export default {
                 let adjustedWeight = adjustWeight(wordObject.count);
                 weightedWordList.push({
                     collocate: wordObject.collocate,
+                    surfaceForm: wordObject.surfaceForm,
                     weight: 1 + adjustedWeight / 10,
                     color: this.colorCodes[adjustedWeight],
                 });
@@ -260,36 +257,44 @@ th {
     font-weight: 400;
     font-variant: small-caps;
 }
+
 tbody tr {
     cursor: pointer;
 }
+
 #description {
     position: relative;
 }
+
 #export-results {
     position: absolute;
     right: 0;
     padding: 0.125rem 0.25rem;
     font-size: 0.8rem !important;
 }
+
 .cloud-word {
     display: inline-block;
     padding: 5px;
     cursor: pointer;
     line-height: initial;
 }
+
 .table th,
 .table td {
     padding: 0.45rem 0.75rem;
 }
+
 #filter-list {
     position: absolute;
     z-index: 100;
 }
+
 #filter-list .list-group-item {
     border-width: 0px;
     padding: 0.1rem;
 }
+
 #close-filter-list {
     width: fit-content;
     float: right;

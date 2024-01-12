@@ -30,6 +30,7 @@ class PlainTextParser:
         known_metadata={},
         words_to_index=None,
         paragraph_on_newline=False,  # TODO: make this configurable from load_config.py
+        lemmas=None,
         **parse_options,
     ):
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
@@ -70,6 +71,9 @@ class PlainTextParser:
 
         self.buffer_position = 0
         self.buffers = []
+
+        self.lemmas = lemmas
+
         if words_to_index:
             self.words_to_index = words_to_index
             self.defined_words_to_index = True
@@ -127,6 +131,8 @@ class PlainTextParser:
                         if self.defined_words_to_index is True and word not in self.words_to_index:
                             continue
                         self.v.push("word", word, start_byte)
+                        if self.lemmas is not None:
+                            self.v["word"]["lemma"] = self.lemmas.get(word, word)
                         self.v.pull("word", end_byte)
                         start_byte += len(word_in_utf8)
                         continue

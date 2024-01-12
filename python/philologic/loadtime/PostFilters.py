@@ -95,7 +95,6 @@ def make_sentences_database(datadir, db_destination):
     )
     with tqdm(total=line_count, leave=False) as pbar:
         env = lmdb.open(db_destination, map_size=2 * 1024 * 1024 * 1024 * 1024, writemap=True)  # 2TB
-        commit_interval = 10000
         count = 0
         with env.begin(write=True) as txn:
             for raw_words in os.scandir(f"{datadir}/words_and_philo_ids"):
@@ -113,9 +112,13 @@ def make_sentences_database(datadir, db_destination):
                                     words = []
                                     count += 1
                                 current_sentence = sentence_id
+                            if "lemma" in word_obj:
+                                lemma = f'lemma:{word_obj["lemma"]}'
+                            else:
+                                lemma = ""
                             words.append(
-                                (word_obj["token"], int(word_obj["position"].split()[6]), "")
-                            )  # empty string is placeholder for word attribs
+                                (word_obj["token"], lemma, word_obj["start_byte"])
+                            )  # maybe add word attribs later...
                         pbar.update()
                     if sentence_id:
                         txn.put(sentence_id, msgpack.dumps(words))

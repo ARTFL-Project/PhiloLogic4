@@ -318,37 +318,6 @@ entity_regex = [
 LINE_SPLITTER = re.compile(r"([^\n]+)")
 
 
-class DocumentContent:
-    """Content of document: a generator functionning like a list"""
-
-    def __init__(self, content):
-        self.lines = LINE_SPLITTER.finditer(content)
-        self.read_ahead = deque()
-        self.read_ahead_count = 0
-        self.line_count = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        self.line_count += 1
-        if self.read_ahead_count != 0:
-            self.read_ahead_count -= 1
-            line = self.read_ahead.popleft()
-            return line
-        try:
-            line = next(self.lines)
-            return line.groups()[0]
-        except StopIteration:
-            raise StopIteration
-
-    def __getitem__(self, item):
-        self.read_ahead_count += 1
-        line = next(self.lines).groups()[0]
-        self.read_ahead.append(line)
-        return line
-
-
 class XMLParser:
     """Parses clean or dirty XML.
     This is a port of the PhiloLogic3 parser originally written by Mark Olsen in Perl.
@@ -365,6 +334,7 @@ class XMLParser:
         metadata_to_parse=DEFAULT_METADATA_TO_PARSE,
         file_type="xml",
         lowercase_index=False,
+        lemmas=None,
         **parse_options,
     ):
         """Initialize class"""
@@ -486,6 +456,8 @@ class XMLParser:
             self.flatten_ligatures = parse_options["flatten_ligatures"]
         else:
             self.flatten_ligatures = True
+
+        self.lemmas = lemmas
 
         self.metadata_sql_types = parse_options["metadata_sql_types"]
 
@@ -1174,6 +1146,8 @@ class XMLParser:
                             if self.current_tag == "w":
                                 for attrib, value in self.word_tag_attributes:
                                     self.v["word"][attrib] = value
+                            elif self.lemmas is not None:
+                                self.v["word"]["lemma"] = self.lemmas.get(word, word)
                             self.v.pull("word", current_pos)
 
                     # Sentence break handler
