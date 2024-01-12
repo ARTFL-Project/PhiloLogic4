@@ -93,7 +93,7 @@ def get_neighboring_words(environ, start_response):
                 left_side_text = []
                 right_side_text = []
                 query_words = []
-                for word, _, start_byte in words:
+                for word, _, start_byte, _ in words:
                     if NUMBER.search(word):
                         continue
                     if db.locals.ascii_conversion is True:

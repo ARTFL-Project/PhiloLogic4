@@ -33,9 +33,6 @@ def term_group(environ, start_response):
     if not request["q"]:
         dump = orjson.dumps({"original_query": "", "term_groups": []})
     else:
-        hits = db.query(
-            request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata
-        )
         parsed = parse_query(request.q)
         group = group_terms(parsed)
         all_groups = split_terms(group)
@@ -53,6 +50,8 @@ def term_group(environ, start_response):
                 elif kind == "TERM":
                     term_group += " %s " % term
                 elif kind == "QUOTE":
+                    term_group += " %s " % term
+                elif kind == "LEMMA":
                     term_group += " %s " % term
             term_group = term_group.strip()
             term_groups.append(term_group)

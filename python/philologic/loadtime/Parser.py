@@ -1147,7 +1147,10 @@ class XMLParser:
                                 for attrib, value in self.word_tag_attributes:
                                     self.v["word"][attrib] = value
                             elif self.lemmas is not None:
-                                self.v["word"]["lemma"] = self.lemmas.get(word, word)
+                                if word not in self.lemmas:
+                                    self.v["word"]["lemma"] = self.lemmas.get(word.lower(), word)
+                                else:
+                                    self.v["word"]["lemma"] = self.lemmas[word]
                             self.v.pull("word", current_pos)
 
                     # Sentence break handler

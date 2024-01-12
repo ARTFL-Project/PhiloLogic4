@@ -117,7 +117,7 @@ def make_sentences_database(datadir, db_destination):
                             else:
                                 lemma = ""
                             words.append(
-                                (word_obj["token"], lemma, word_obj["start_byte"])
+                                (word_obj["token"], lemma, word_obj["start_byte"], word_obj["position"][6])
                             )  # maybe add word attribs later...
                         pbar.update()
                     if sentence_id:

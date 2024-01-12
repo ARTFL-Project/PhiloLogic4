@@ -3,9 +3,11 @@
 
 import os
 import timeit
+import struct
+from typing import Any
+
 import msgpack
 import lmdb
-
 from philologic.runtime.DB import DB
 from philologic.runtime.Query import get_expanded_query
 
@@ -13,7 +15,13 @@ from philologic.runtime.Query import get_expanded_query
 def collocation_results(request, config):
     """Fetch collocation results"""
     db = DB(config.db_path + "/data/")
-    collocation_object = {"query": dict([i for i in request])}
+    collocation_object: dict[str, Any] = {"query": dict([i for i in request])}
+
+    # We turn on lemma counting if the query word is a lemma search
+    if "lemma:" in request["q"]:
+        count_lemmas = True
+    else:
+        count_lemmas = False
 
     try:
         collocate_distance = int(request["collocate_distance"])
@@ -23,7 +31,7 @@ def collocation_results(request, config):
     if request.colloc_filter_choice == "nofilter":
         filter_list = []
     else:
-        filter_list = build_filter_list(request, config)
+        filter_list = build_filter_list(request, config, count_lemmas)
     collocation_object["filter_list"] = filter_list
     filter_list = set(filter_list)
 
@@ -58,7 +66,6 @@ def collocation_results(request, config):
     hits_done = request.start or 0
     max_time = request.max_time or 2
     all_collocates = {}
-    cursor = db.dbh.cursor()
     start_time = timeit.default_timer()
 
     env = lmdb.open(
@@ -67,27 +74,30 @@ def collocation_results(request, config):
         lock=False,
     )
 
-    # We turn on lemma counting if the query word is a lemma search
-    if "lemma:" in request["q"]:
-        count_lemmas = True
-    else:
-        count_lemmas = False
     with env.begin() as txn:
         cursor = txn.cursor()
         for hit in hits[hits_done:]:
             parent_sentence = hit[:24]  # 24 bytes for the first 6 integers
+            q_word_position = struct.unpack("1I", hit[24:28])  # 4 bytes for the 7th integer
             sentence = cursor.get(parent_sentence)
             word_objects = msgpack.loads(sentence)
             if count_lemmas is False:
-                words = [word for word, _, _ in word_objects]
+                words = [(word, position) for word, _, _, position in word_objects]
             else:
-                words = [lemma for _, lemma, _ in word_objects]
-            for collocate in words:
+                words = [(lemma, position) for _, lemma, _, position in word_objects]
+            for collocate, position in words:
                 if collocate not in filter_list:
-                    if collocate not in all_collocates:
-                        all_collocates[collocate] = {"count": 1}
+                    if collocate_distance is None:
+                        if collocate not in all_collocates:
+                            all_collocates[collocate] = {"count": 1}
+                        else:
+                            all_collocates[collocate]["count"] += 1
                     else:
-                        all_collocates[collocate]["count"] += 1
+                        if abs(position - q_word_position[0]) <= collocate_distance:
+                            if collocate not in all_collocates:
+                                all_collocates[collocate] = {"count": 1}
+                            else:
+                                all_collocates[collocate]["count"] += 1
             hits_done += 1
 
             elapsed = timeit.default_timer() - start_time
@@ -105,11 +115,12 @@ def collocation_results(request, config):
     else:
         collocation_object["more_results"] = False
         collocation_object["hits_done"] = collocation_object["results_length"]
+    collocation_object["distance"] = collocate_distance
 
     return collocation_object
 
 
-def build_filter_list(request, config):
+def build_filter_list(request, config, count_lemmas):
     """set up filtering with stopwords or most frequent terms."""
     if config.stopwords and request.colloc_filter_choice == "stopwords":
         if config.stopwords and "/" not in config.stopwords:
@@ -136,5 +147,8 @@ def build_filter_list(request, config):
                 word = line.split()[0]
             except IndexError:
                 continue
-            filter_list.append(word)
+            if count_lemmas is False:
+                filter_list.append(word)
+            else:
+                filter_list.append("lemma:" + word)
     return filter_list
