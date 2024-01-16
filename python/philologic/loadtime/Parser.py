@@ -1148,9 +1148,9 @@ class XMLParser:
                                     self.v["word"][attrib] = value
                             elif self.lemmas is not None:
                                 if word not in self.lemmas:
-                                    self.v["word"]["lemma"] = self.lemmas.get(word.lower(), word)
+                                    self.v["word"]["lemma"] = self.lemmas.get(word.lower(), word).lower()
                                 else:
-                                    self.v["word"]["lemma"] = self.lemmas[word]
+                                    self.v["word"]["lemma"] = self.lemmas[word].lower()
                             self.v.pull("word", current_pos)
 
                     # Sentence break handler

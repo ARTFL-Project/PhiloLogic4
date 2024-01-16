@@ -729,7 +729,7 @@ class Loader:
             current_word = None
             philo_ids = bytearray()
             txn = db_env.begin(write=True)
-            for line in tqdm(input_file, total=line_count, desc="Creating word index"):
+            for line in tqdm(input_file, total=line_count, desc="Creating word index", leave=False):
                 line = line.decode("utf-8")  # type: ignore
                 _, word, philo_id, _ = line.split("\t", 3)
                 hit = list(map(int, philo_id.split()))
@@ -765,7 +765,7 @@ class Loader:
                 current_lemma = None
                 count = 0
                 philo_ids = bytearray()
-                for line in tqdm(input_file, total=line_count, desc="Creating lemma index"):
+                for line in tqdm(input_file, total=line_count, leave=False, desc="Creating lemma index"):
                     line = line.decode("utf-8")
                     _, lemma, philo_id = line.strip().split("\t")
                     hit = list(map(int, philo_id.split()))
@@ -790,6 +790,7 @@ class Loader:
                         f"lemma:{current_lemma}".encode("utf-8"),
                         philo_ids,
                     )
+                txn.commit()
         db_env.close()
         print("Finished creating inverted index.")
 
@@ -808,7 +809,7 @@ class Loader:
         #         for line in tqdm(input_file, total=line_count, desc="Storing words in LMDB database"):
         #             line = line.decode("utf-8")
         #             _, word, philo_id, attributes = line.split("\t", 3)
-        #             philo_id_bytes = struct.pack(">9I", *map(int, philo_id.split()))
+        #             philo_id_bytes = struct.pack("9I", *map(int, philo_id.split()))
         #             local_word_attributes = loads(attributes)
         #             for attribute in self.word_attributes:
         #                 attribute_value = local_word_attributes[attribute]
