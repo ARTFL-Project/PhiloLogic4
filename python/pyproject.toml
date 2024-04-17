@@ -1,0 +1,45 @@
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "build", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "philologic"
+dynamic = ["version"]
+authors = [
+    { name = "Clovis Gladstone", email = "clovisgladstone@artfl.uchicago.edu" },
+]
+license = { file = "LICENSE" }
+description = "A concordance search engine for TEI-XML"
+readme = "README" # If your readme file is named README
+urls = { Homepage = "https://github.com/ARTFL-Project/PhiloLogic5" }
+
+requires-python = ">=3.10"
+dependencies = [
+    "regex",
+    "lxml",
+    "python-levenshtein",
+    "natsort",
+    "multiprocess",
+    "tqdm",
+    "orjson",
+    "black",
+    "msgpack",
+    "unidecode",
+    "lz4",
+]
+
+[project.scripts]
+philoload4 = "philologic.loadtime:philoload"
+
+[tool.setuptools_scm]
+root = ".."
+
+[tool.setuptools]
+packages = [
+    "philologic",
+    "philologic.runtime",
+    "philologic.utils",
+    "philologic.runtime.reports",
+    "philologic.loadtime",
+]

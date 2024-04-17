@@ -17,8 +17,11 @@ fi
 cd ..;
 PYTHON_INSTALL="\n## INSTALLING PYTHON LIBRARY ##"
 echo "$PYTHON_INSTALL"
+sudo pip3 install build
 cd python;
-sudo -H pip3 install --upgrade .
+rm -rf dist/
+python3 -m build --sdist
+sudo -H pip3 install dist/*gz
 sudo mkdir -p /etc/philologic/
 
 cd ..;
