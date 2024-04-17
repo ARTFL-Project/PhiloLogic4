@@ -37,5 +37,3 @@ def philoload():
         )
 
     print(f"Application viewable at {os.path.join(CONFIG_FILE.url_root, load_options.dbname)}\n")
-
-    print(f"Application viewable at {os.path.join(CONFIG_FILE.url_root, load_options.dbname)}\n")
