@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "philologic"
-dynamic = ["version"]
+version = "4.7.5.0"
 authors = [
     { name = "Clovis Gladstone", email = "clovisgladstone@artfl.uchicago.edu" },
 ]
