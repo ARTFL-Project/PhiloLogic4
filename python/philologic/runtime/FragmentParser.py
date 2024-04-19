@@ -26,6 +26,9 @@ class FragmentParser:
             if no_ns_k != k:
                 del attrib[k]
                 attrib[no_ns_k] = v
+        import sys
+
+        print(self.current_el, tag, attrib, file=sys.stderr)
         new_el = etree.SubElement(self.current_el, tag, attrib)
         new_el.text = ""
         new_el.tail = ""
