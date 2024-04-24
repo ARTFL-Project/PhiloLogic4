@@ -9,7 +9,6 @@ title: Installing PhiloLogic4 on Ubuntu
     -   zlib1g-dev
     -   apache2
     -   libgdbm-dev
-    -   python3-pip
     -   libgdbm-dev
     -   liblz4-tool
     -   brotli
@@ -17,7 +16,10 @@ title: Installing PhiloLogic4 on Ubuntu
 
     Run the following command:
 
-    `sudo apt-get install libxml2-dev libxslt-dev zlib1g-dev apache2 libgdbm-dev python3-pip liblz4-tool brotli ripgrep`
+    `sudo apt-get install libxml2-dev libxslt-dev zlib1g-dev apache2 libgdbm-dev liblz4-tool brotli ripgrep`
+
+- Install pip3 (not the version from Ubuntu repos since it breaks pyproject.toml builds)
+    `wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py`
 
 -   Run install script inside the PhiloLogic4 directory
 
