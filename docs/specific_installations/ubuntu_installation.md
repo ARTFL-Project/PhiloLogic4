@@ -29,3 +29,4 @@ title: Installing PhiloLogic4 on Ubuntu
     -   enable mod_rewrite: `sudo a2enmod rewrite`
     -   enable mod_cgi: `sudo a2enmod cgi`
     -   enable brotli: `sudo a2enmod brotli`
+    -   Make sure to set `AllowOverride` to `all` for the directory containined your philologic databases in your Apache config
