@@ -3,6 +3,7 @@
 Calls all parsing functions and stores data in index"""
 
 import collections
+import csv
 import datetime
 import math
 import os
@@ -13,7 +14,6 @@ import sys
 import time
 from glob import iglob
 from json import dump
-import csv
 
 import lxml.etree
 import regex as re
@@ -927,8 +927,8 @@ def setup_db_dir(db_destination, web_app_dir, force_delete=False):
         os.mkdir(db_destination)
     except OSError:
         if force_delete is True:  # useful to run db loads with nohup
-            os.system("rm -rf %s" % db_destination)
-            os.mkdir(db_destination)
+            shutil.rmtree(db_destination)
+            os.makedirs(db_destination, exist_ok=True)  # in the event it does not get deleted.
         else:
             print("The database folder could not be created at %s" % db_destination)
             print("Do you want to delete this database? Yes/No")
