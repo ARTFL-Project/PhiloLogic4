@@ -1,6 +1,6 @@
 <template>
     <div id="landing-page-container" class="mt-5">
-        <div class="container-fluid">
+        <div class="container-fluid" role="main">
             <div id="landing-page-logo" :class="{ dictionary: dictionary }" v-if="logo">
                 <img style="max-height: 300px; width: auto" :src="logo" alt="logo" />
             </div>
@@ -18,9 +18,9 @@
                                 v-for="(range, rangeIndex) in browseType.queries" :key="rangeIndex"
                                 @click="getContent(browseType, range)">
                                 <button class="btn btn-light landing-page-btn" :class="{
-                                    first: rangeIndex === 0,
-                                    last: rangeIndex === browseType.queries.length - 1,
-                                }" style="border-radius: 0; width: 100%">
+                first: rangeIndex === 0,
+                last: rangeIndex === browseType.queries.length - 1,
+            }" style="border-radius: 0; width: 100%">
                                     {{ range }}
                                 </button>
                             </div>
@@ -52,8 +52,9 @@
                                 <div class="list-group-item" v-for="volume in volumeData" :key="volume.philo_id">
                                     <router-link :to="`/navigate/${volume.philo_id}/table-of-contents`">
                                         <i style="font-variant: small-caps">{{ volume.title }}</i>
-                                        <span style="font-weight: 300; padding-left: 0.25rem" v-if="volume.start_head">({{
-                                            volume.start_head }} - {{ volume.end_head }})</span>
+                                        <span style="font-weight: 300; padding-left: 0.25rem"
+                                            v-if="volume.start_head">({{
+                volume.start_head }} - {{ volume.end_head }})</span>
                                     </router-link>
                                 </div>
                             </div>
@@ -92,7 +93,9 @@
                                 </li>
                             </ul>
                             <p class="pt-2 ps-3" v-if="group.results.length > 100">
-                                <button type="button" class="btn btn-outline-secondary" @click="seeAll(groupIndex)">
+                                <button type="button" class="btn btn-outline-secondary"
+                                    :aria-label="$t('landingPage.seeResults', { n: group.results.length })"
+                                    @click="seeAll(groupIndex)">
                                     {{ $t("landingPage.seeResults", { n: group.results.length }) }}
                                 </button>
                             </p>
@@ -104,8 +107,8 @@
     </div>
 </template>
 <script>
-import citations from "./Citations";
 import { mapFields } from "vuex-map-fields";
+import citations from "./Citations";
 
 export default {
     name: "landingPage",

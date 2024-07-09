@@ -3,12 +3,8 @@
         <div class="collapse navbar-collapse top-links">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a
-                        class="nav-link"
-                        :href="philoConfig.link_to_home_page"
-                        v-if="philoConfig.link_to_home_page != ''"
-                        >{{ $t("header.goHome") }}</a
-                    >
+                    <a class="nav-link" :href="philoConfig.link_to_home_page"
+                        v-if="philoConfig.link_to_home_page != ''">{{ $t("header.goHome") }}</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="https://artfl-project.uchicago.edu">ARTFL Project</a>
@@ -18,13 +14,9 @@
                 </li>
             </ul>
         </div>
-        <button
-            type="button"
-            class="nav-link position-absolute cite"
-            data-bs-toggle="modal"
-            data-bs-target="#academic-citation"
-            v-if="philoConfig.academic_citation.collection.length > 0"
-        >
+        <button type="button" class="nav-link position-absolute cite" :aria-label="$t('header.citeUs')"
+            data-bs-toggle="modal" data-bs-target="#academic-citation"
+            v-if="philoConfig.academic_citation.collection.length > 0">
             {{ $t("header.citeUs") }}
         </button>
         <router-link class="navbar-brand" to="/" v-html="philoConfig.dbname"></router-link>
@@ -36,32 +28,17 @@
                 <a class="nav-link" href="https://atilf.fr">ATILF-CNRS</a>
             </li>
             <li class="nav-item">
-                <a
-                    class="nav-link"
-                    href="https://artfl-project.uchicago.edu/content/contact-us"
-                    title="Contact information for the ARTFL Project"
-                    >{{ $t("header.contactUs") }}</a
-                >
+                <a class="nav-link" href="https://artfl-project.uchicago.edu/content/contact-us"
+                    title="Contact information for the ARTFL Project">{{ $t("header.contactUs") }}</a>
             </li>
             <li class="nav-item">
                 <locale-changer />
             </li>
         </ul>
-        <a
-            id="report-error-link"
-            class="nav-link position-absolute"
-            :href="philoConfig.report_error_link"
-            target="_blank"
-            v-if="philoConfig.report_error_link.length > 0"
-            >{{ $t("common.reportError") }}</a
-        >
-        <div
-            class="modal fade"
-            id="academic-citation"
-            tabindex="-1"
-            aria-labelledby="academic-citation"
-            aria-hidden="true"
-        >
+        <a id="report-error-link" class="nav-link position-absolute" :href="philoConfig.report_error_link"
+            target="_blank" v-if="philoConfig.report_error_link.length > 0">{{ $t("common.reportError") }}</a>
+        <div class="modal fade" id="academic-citation" tabindex="-1" aria-labelledby="academic-citation"
+            aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -69,9 +46,9 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <span v-if="docCitation.citation.length > 0"
-                            ><citations :citation="docCitation.citation" separator=", " /> , &nbsp;</span
-                        >
+                        <span v-if="docCitation.citation.length > 0">
+                            <citations :citation="docCitation.citation" separator=", " /> , &nbsp;
+                        </span>
                         <span v-html="philoConfig.academic_citation.collection"></span>:
                         <a :href="citeURL">{{ citeURL }}</a>
                         <span>. Accessed on {{ date }}</span>
@@ -144,17 +121,20 @@ export default {
 
 <style lang="scss" scoped>
 @import "../assets/styles/theme.module.scss";
+
 .top-links {
     margin-left: -0.25rem;
     font-size: 80%;
     margin-top: -2rem;
     font-variant: small-caps;
 }
+
 #right-side-links {
     font-size: 80%;
     margin-top: -1rem;
     font-variant: small-caps;
 }
+
 .navbar-brand {
     font-weight: 700;
     font-size: 1.6rem !important;
@@ -171,6 +151,7 @@ export default {
     font-variant: small-caps;
     font-weight: 700;
 }
+
 .cite {
     left: 0.5rem;
     bottom: 0.25rem;
@@ -180,6 +161,7 @@ export default {
     border-width: 0;
     color: $link-color;
 }
+
 .modal-dialog {
     max-width: fit-content;
 }

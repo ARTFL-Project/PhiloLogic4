@@ -12,7 +12,8 @@
         <div class="row text-center mt-4" id="toc-wrapper" v-if="navBar === true || loading === false">
             <div id="toc-top-bar">
                 <div id="nav-buttons" v-scroll="handleScroll">
-                    <button type="button" class="btn btn-secondary btn-sm" id="back-to-top" @click="backToTop()">
+                    <button type="button" class="btn btn-secondary btn-sm" :arial-label="$t('textNav.backToTop')"
+                        id="back-to-top" @click="backToTop()">
                         <span class="d-none d-sm-inline-block">{{ $t("textNav.backToTop") }}</span>
                         <span class="d-inline-block d-sm-none">{{ $t("textNav.top") }}</span>
                     </button>
@@ -37,7 +38,8 @@
                 </div>
                 <div id="toc">
                     <div id="toc-titlebar" class="d-none">
-                        <button type="button" class="btn btn-secondary" id="hide-toc" @click="toggleTableOfContents()">
+                        <button type="button" class="btn btn-secondary" aria-label="Close" id="hide-toc"
+                            @click="toggleTableOfContents()">
                             X
                         </button>
                     </div>
@@ -45,7 +47,8 @@
                         <div class="card p-3 shadow" id="toc-content" :style="tocHeight" :scroll-to="tocPosition"
                             v-if="tocOpen">
                             <div class="toc-more before" v-if="start !== 0">
-                                <button type="button" class="btn btn-default btn-sm" @click="loadBefore()"></button>
+                                <button type="button" class="btn btn-default btn-sm" aria-label="Load previous section"
+                                    @click="loadBefore()"></button>
                             </div>
                             <div v-for="(element, tocIndex) in tocElementsToDisplay" :key="tocIndex">
                                 <div :id="element.philo_id" :class="'toc-' + element.philo_type"
@@ -57,7 +60,8 @@
                                 </div>
                             </div>
                             <div class="toc-more after" v-if="end < tocElements.length">
-                                <button type="button" class="btn btn-default btn-sm" @click="loadAfter()"></button>
+                                <button type="button" class="btn btn-default btn-sm" aria-label="Load next section"
+                                    @click="loadAfter()"></button>
                             </div>
                         </div>
                     </transition>
@@ -130,11 +134,11 @@
     </div>
 </template>
 <script>
-import { mapFields } from "vuex-map-fields";
-import citations from "./Citations";
+import { Popover } from "bootstrap";
 import GLightbox from 'glightbox';
 import 'glightbox/dist/css/glightbox.css';
-import { Popover } from "bootstrap";
+import { mapFields } from "vuex-map-fields";
+import citations from "./Citations";
 
 export default {
     name: "textNavigation",

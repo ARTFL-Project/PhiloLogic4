@@ -1,10 +1,7 @@
 <template>
-    <div class="container-fluid mt-4">
-        <results-summary
-            :description="results.description"
-            :running-total="runningTotal"
-            :filter-list="filterList"
-        ></results-summary>
+    <div class="container-fluid mt-4" role="main">
+        <results-summary :description="results.description" :running-total="runningTotal"
+            :filter-list="filterList"></results-summary>
         <div class="row mt-4 pe-1" style="padding: 0 0.5rem" v-if="resultsLength">
             <div class="col-12 col-sm-4">
                 <div class="card shadow-sm">
@@ -16,12 +13,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr
-                                style="line-height: 2rem"
-                                v-for="word in sortedList"
-                                :key="word.collocate"
-                                @click="collocTableClick(word)"
-                            >
+                            <tr style="line-height: 2rem" v-for="word in sortedList" :key="word.collocate"
+                                @click="collocTableClick(word)">
                                 <td class="text-view">{{ word.collocate }}</td>
                                 <td>{{ word.count }}</td>
                             </tr>
@@ -32,14 +25,8 @@
             <div class="col-12 col-sm-8">
                 <div class="card p-3 shadow-sm">
                     <div class="card-text">
-                        <span
-                            class="cloud-word text-view"
-                            v-for="word in collocCloudWords"
-                            :key="word.word"
-                            :style="getWordCloudStyle(word)"
-                            @click="collocTableClick(word)"
-                            >{{ word.collocate }}</span
-                        >
+                        <span class="cloud-word text-view" v-for="word in collocCloudWords" :key="word.word"
+                            :style="getWordCloudStyle(word)" @click="collocTableClick(word)">{{ word.collocate }}</span>
                     </div>
                 </div>
             </div>
@@ -48,8 +35,8 @@
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import ResultsSummary from "./ResultsSummary";
 import variables from "../assets/styles/theme.module.scss";
+import ResultsSummary from "./ResultsSummary";
 
 export default {
     name: "collocation-report",
@@ -91,7 +78,7 @@ export default {
                 let gLocal = g - g * step * i;
                 let bLocal = b - b * step * i;
                 let opacityStep = i * 0.03;
-                colorCodes[i] = `rgba(${rLocal}, ${gLocal}, ${bLocal}, ${0.4 + opacityStep})`;
+                colorCodes[i] = `rgba(${rLocal}, ${gLocal}, ${bLocal}, ${0.8 + opacityStep})`;
             }
             return colorCodes;
         },
@@ -260,36 +247,44 @@ th {
     font-weight: 400;
     font-variant: small-caps;
 }
+
 tbody tr {
     cursor: pointer;
 }
+
 #description {
     position: relative;
 }
+
 #export-results {
     position: absolute;
     right: 0;
     padding: 0.125rem 0.25rem;
     font-size: 0.8rem !important;
 }
+
 .cloud-word {
     display: inline-block;
     padding: 5px;
     cursor: pointer;
     line-height: initial;
 }
+
 .table th,
 .table td {
     padding: 0.45rem 0.75rem;
 }
+
 #filter-list {
     position: absolute;
     z-index: 100;
 }
+
 #filter-list .list-group-item {
     border-width: 0px;
     padding: 0.1rem;
 }
+
 #close-filter-list {
     width: fit-content;
     float: right;
@@ -298,4 +293,3 @@ tbody tr {
     right: 0;
 }
 </style>
-

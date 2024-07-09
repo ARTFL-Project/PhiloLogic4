@@ -11,15 +11,18 @@
                 </p>
                 <div v-if="report == 'concordance' || report == 'kwic'">
                     <h6>{{ $t("exportResults.html") }}:</h6>
-                    <button type="button" class="btn btn-secondary" @click="getResults('json', false)">JSON</button
-                    >&nbsp;
-                    <button type="button" class="btn btn-secondary" @click="getResults('csv', false)">CSV</button>
+                    <button type="button" class="btn btn-secondary"
+                        @click="getResults('json', false)">JSON</button>&nbsp;
+                    <button type="button" class="btn btn-secondary" aria-label="CSV"
+                        @click="getResults('csv', false)">CSV</button>
                 </div>
                 <h6 class="mt-2" v-if="report == 'concordance' || report == 'kwic'">
                     {{ $t("exportResults.plain") }}:
                 </h6>
-                <button type="button" class="btn btn-secondary" @click="getResults('json', true)">JSON</button>&nbsp;
-                <button type="button" class="btn btn-secondary" @click="getResults('csv', true)">CSV</button>
+                <button type="button" class="btn btn-secondary" aria-label="JSON"
+                    @click="getResults('json', true)">JSON</button>&nbsp;
+                <button type="button" class="btn btn-secondary" aria-label="CSV"
+                    @click="getResults('csv', true)">CSV</button>
             </div>
         </div>
     </div>

@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-4" role="main">
         <results-summary :groupLength="aggregationResults.length"></results-summary>
         <div class="card shadow mt-4 ms-2 me-2" v-if="resultsLength" v-scroll="handleFullResultsScroll">
             <div id="aggregation-results" class="list-group">
@@ -13,7 +13,7 @@
                     <span class="badge rounded-pill bg-secondary" style="font-size: 100%">{{ result.count }}</span>
                     <citations :citation="result.citation"></citations>
                     <span class="d-inline-block ps-1" v-if="breakUpFields[resultIndex].results.length">{{
-                        $t("common.across") }} {{ breakUpFields[resultIndex].results.length }}
+            $t("common.across") }} {{ breakUpFields[resultIndex].results.length }}
                         {{ breakUpFieldName }}(s)</span>
                     <h6 class="ms-4 mt-2"
                         v-if="breakUpFields[resultIndex].show && breakUpFields[resultIndex].results.length > 1000">
@@ -21,17 +21,16 @@
                     </h6>
                     <div class="list-group ms-4 mt-2" v-if="breakUpFields[resultIndex].show">
                         <div class="list-group-item" v-for="(value, key) in breakUpFields[resultIndex].results.slice(
-                            0,
-                            breakUpFields[resultIndex].limit
-                        )" :key="key">
+            0,
+            breakUpFields[resultIndex].limit
+        )" :key="key">
                             <span class="badge rounded-pill bg-secondary">{{ value.count }}</span>
-                            <citations :citation="
-                                buildCitationObject(
-                                    statsConfig.break_up_field,
-                                    statsConfig.break_up_field_citation,
-                                    value.metadata_fields
-                                )
-                            "></citations>
+                            <citations :citation="buildCitationObject(
+            statsConfig.break_up_field,
+            statsConfig.break_up_field_citation,
+            value.metadata_fields
+        )
+            "></citations>
                         </div>
                     </div>
                 </div>

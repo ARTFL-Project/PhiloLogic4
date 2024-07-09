@@ -3,8 +3,7 @@
         <div v-if="currentWordQuery !== ''">
             {{ $t("searchArgs.searchingDbFor") }}
             <span v-if="approximate == 'yes'">
-                {{ $t("searchArgs.termsSimilarTo") }} <b>{{ currentWordQuery }}</b
-                >:
+                {{ $t("searchArgs.termsSimilarTo") }} <b>{{ currentWordQuery }}</b>:
             </span>
             <span v-else>{{ $t("searchArgs.terms") }}&nbsp;</span>
             <span v-if="approximate.length == 0 || approximate == 'no'"></span>
@@ -14,27 +13,22 @@
             </span>
             {{ queryArgs.proximity }}
             <div class="card outline-secondary shadow" id="query-terms" style="display: none">
-                <button type="button" class="btn btn-secondary btn-sm close" @click="closeTermsList()">
+                <button type="button" class="btn btn-secondary btn-sm close" aria-label="Close"
+                    @click="closeTermsList()">
                     <span aria-hidden="true">&times;</span>
                 </button>
                 <h6 class="pe-4">{{ $t("searchArgs.termsExpanded", { length: words.length }) }}:</h6>
                 <h6 v-if="words.length > 100">{{ $t("searchArgs.mostFrequentTerms") }}</h6>
-                <button
-                    type="button"
-                    class="btn btn-secondary btn-sm"
-                    style="margin: 10px 0px"
-                    v-if="wordListChanged"
-                    @click="rerunQuery()"
-                >
+                <button type="button" class="btn btn-secondary btn-sm" style="margin: 10px 0px" v-if="wordListChanged"
+                    @click="rerunQuery()">
                     {{ $t("searchArgs.rerunQuery") }}
                 </button>
                 <div class="row" id="query-terms-list">
                     <div class="col-3" v-for="word in words" :key="word">
-                        <button class="rounded-pill term-groups">
+                        <button class="rounded-pill term-groups" :aria-label="`Remove ${word}`">
                             <span class="px-2">{{ word.replace(/"/g, "") }}</span>
-                            <span class="close-pill pe-1" @click="removeFromTermsList(word, groupIndexSelected)"
-                                >X</span
-                            >
+                            <span class="close-pill pe-1"
+                                @click="removeFromTermsList(word, groupIndexSelected)">X</span>
                         </button>
                     </div>
                 </div>
@@ -55,8 +49,7 @@
                 <span class="metadata-args rounded-pill">
                     <span class="metadata-value">{{ start_date }}</span>
                     <span class="remove-metadata" @click="removeMetadata('start_date', restart)">X</span>
-                </span> </span
-            >&nbsp; {{ $t("common.and") }}&nbsp;
+                </span> </span>&nbsp; {{ $t("common.and") }}&nbsp;
             <span class="biblio-criteria">
                 <span class="metadata-args rounded-pill">
                     <span class="metadata-value">{{ end_date }}</span>
@@ -308,6 +301,7 @@ export default {
 #search-arguments {
     line-height: 180%;
 }
+
 #query-terms {
     position: absolute;
     z-index: 100;
@@ -315,7 +309,7 @@ export default {
     box-shadow: 0px 0.2em 8px 0.01em rgba(0, 0, 0, 0.1);
 }
 
-#query-terms > button:first-child {
+#query-terms>button:first-child {
     position: absolute;
     right: 2px;
     top: 0;
@@ -333,10 +327,12 @@ export default {
     text-align: center;
     width: fit-content;
 }
+
 .close {
     position: absolute;
     right: 0;
 }
+
 .term-groups {
     display: inline-block;
     position: relative;
@@ -347,6 +343,7 @@ export default {
     white-space: inherit;
     background-color: #fff;
 }
+
 .term-group-word {
     display: inline-block;
     border-radius: 50rem 0 0 50rem !important;
@@ -354,10 +351,12 @@ export default {
     width: 100%;
     padding-left: 0.5rem;
 }
+
 .term-group-word:hover {
     background-color: #e9ecef;
     color: initial;
 }
+
 .close-pill {
     position: absolute;
     right: 0;
@@ -368,6 +367,7 @@ export default {
     display: inline-block;
     border-left: solid 1px #888;
 }
+
 .metadata-args {
     border: 1px solid #ddd;
     display: inline-flex !important;
@@ -377,6 +377,7 @@ export default {
     line-height: 2;
     margin-bottom: 0.5rem;
 }
+
 .metadata-label {
     background-color: #e9ecef;
     border: solid #ddd;
@@ -385,11 +386,13 @@ export default {
     border-bottom-left-radius: 50rem;
     padding: 0 0.5rem;
 }
+
 .metadata-value {
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
     padding: 0 0.5rem;
 }
+
 .remove-metadata {
     padding-right: 5px;
     padding-left: 5px;
@@ -398,15 +401,18 @@ export default {
     border-bottom-right-radius: 50rem;
     padding: 0 0.5rem;
 }
+
 .remove-metadata:hover,
 .close-pill:hover {
     background-color: #e9ecef;
     cursor: pointer;
 }
+
 .rounded-pill a {
     margin-right: 0.5rem;
     text-decoration: none;
 }
+
 .metadata-label,
 .metadata-value,
 .remove-metadata {

@@ -1,15 +1,15 @@
 <template>
-    <div class="container-fluid">
+    <div class="container-fluid" role="main">
         <div id="time-series-container" class="mt-4 mx-2">
             <results-summary :description="results.description" :running-total="runningTotal"></results-summary>
             <div class="card mt-4" id="time-series">
                 <div class="btn-group d-inline-block" role="group">
-                    <button type="button" class="btn btn-secondary" :class="{ active: frequencyType == 'absolute_time' }"
-                        @click="toggleFrequency('absolute_time')">
+                    <button type="button" class="btn btn-secondary"
+                        :class="{ active: frequencyType == 'absolute_time' }" @click="toggleFrequency('absolute_time')">
                         {{ $t("common.absoluteFrequency") }}
                     </button>
-                    <button type="button" class="btn btn-secondary" :class="{ active: frequencyType == 'relative_time' }"
-                        @click="toggleFrequency('relative_time')">
+                    <button type="button" class="btn btn-secondary"
+                        :class="{ active: frequencyType == 'relative_time' }" @click="toggleFrequency('relative_time')">
                         {{ $t("common.relativeFrequency") }}
                     </button>
                 </div>
@@ -23,8 +23,8 @@
 <script>
 import Chart from "chart.js/dist/Chart.min.js";
 import { mapFields } from "vuex-map-fields";
-import ResultsSummary from "./ResultsSummary";
 import cssVariables from "../assets/styles/theme.module.scss";
+import ResultsSummary from "./ResultsSummary";
 
 export default {
     name: "timeSeries",

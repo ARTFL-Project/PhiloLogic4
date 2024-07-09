@@ -4,128 +4,82 @@
             <div class="card-header text-center">
                 <h6 class="mb-0">{{ $t("facets.browseByFacet") }}</h6>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm close-box" @click="toggleFacets()">x</button>
+            <button type="button" class="btn btn-secondary btn-sm close-box" aria-label="Close facets"
+                @click="toggleFacets()">x</button>
             <transition name="slide-fade">
                 <div class="list-group" flush id="select-facets" v-if="showFacetSelection">
                     <span class="dropdown-header text-center">{{ $t("facets.frequencyBy") }}</span>
-                    <div
-                        class="list-group-item facet-selection"
-                        v-for="facet in facets"
-                        :key="facet.alias"
-                        @click="getFacet(facet)"
-                    >
+                    <div class="list-group-item facet-selection" v-for="facet in facets" :key="facet.alias"
+                        @click="getFacet(facet)">
                         {{ facet.alias }}
                     </div>
                 </div>
             </transition>
             <transition name="slide-fade">
-                <div
-                    class="list-group mt-2"
-                    style="border-top: 0"
-                    v-if="showFacetSelection && report != 'bibliography'"
-                >
+                <div class="list-group mt-2" style="border-top: 0"
+                    v-if="showFacetSelection && report != 'bibliography'">
                     <span class="dropdown-header text-center">{{ $t("facets.collocates") }}</span>
-                    <div
-                        class="list-group-item facet-selection"
-                        @click="getFacet(collocationFacet)"
-                        v-if="report !== 'bibliography'"
-                    >
+                    <div class="list-group-item facet-selection" @click="getFacet(collocationFacet)"
+                        v-if="report !== 'bibliography'">
                         {{ $t("common.sameSentence") }}
                     </div>
                 </div>
             </transition>
             <transition name="options-slide">
-                <div
-                    class="m-2 text-center"
-                    style="width: 100%; font-size: 90%; opacity: 0.8; cursor: pointer"
-                    v-if="!showFacetSelection"
-                    @click="showFacetOptions()"
-                >
+                <div class="m-2 text-center" style="width: 100%; font-size: 90%; opacity: 0.8; cursor: pointer"
+                    v-if="!showFacetSelection" @click="showFacetOptions()">
                     {{ $t("facets.showOptions") }}
                 </div>
             </transition>
         </div>
         <div class="d-flex justify-content-center position-relative" v-if="loading">
-            <div
-                class="spinner-border text-secondary"
-                role="status"
-                style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px"
-            >
+            <div class="spinner-border text-secondary" role="status"
+                style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px">
                 <span class="visually-hidden">{{ $t("common.loading") }}...</span>
             </div>
         </div>
         <div class="card mt-3 shadow-sm" id="facet-results" v-if="showFacetResults">
             <div class="card-header text-center">
                 <h6 class="mb-0">{{ $t("facets.frequencyByLabel", { label: selectedFacet.alias }) }}</h6>
-                <button type="button" class="btn btn-secondary btn-sm close-box" @click="hideFacets()">x</button>
+                <button type="button" class="btn btn-secondary btn-sm close-box" aria-label="Hide Facets"
+                    @click="hideFacets()">x</button>
             </div>
-            <div
-                class="btn-group btn-group-sm shadow-sm"
-                role="group"
-                v-if="percent == 100 && report !== 'bibliography' && facet.type === 'facet'"
-            >
-                <button
-                    type="button"
-                    class="btn btn-light"
-                    :class="{ active: showingRelativeFrequencies === false }"
-                    @click="displayAbsoluteFrequencies()"
-                >
+            <div class="btn-group btn-group-sm shadow-sm" role="group"
+                v-if="percent == 100 && report !== 'bibliography' && facet.type === 'facet'">
+                <button type="button" class="btn btn-light" :class="{ active: showingRelativeFrequencies === false }"
+                    @click="displayAbsoluteFrequencies()">
                     {{ $t("common.absoluteFrequency") }}
                 </button>
-                <button
-                    type="button"
-                    class="btn btn-light"
-                    :class="{ active: showingRelativeFrequencies }"
-                    @click="displayRelativeFrequencies()"
-                >
+                <button type="button" class="btn btn-light" :class="{ active: showingRelativeFrequencies }"
+                    @click="displayRelativeFrequencies()">
                     {{ $t("common.relativeFrequency") }}
                 </button>
             </div>
             <div class="m-2 text-center" style="opacity: 0.7">
                 {{ $t("facets.top500Results", { label: selectedFacet.alias }) }}
             </div>
-            <div
-                class="progress my-3 mb-3"
-                :max="resultsLength"
-                show-progress
-                variant="secondary"
-                v-if="percent != 100"
-            >
-                <div
-                    class="progress-bar"
-                    :value="runningTotal"
-                    :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
-                ></div>
+            <div class="progress my-3 mb-3" :max="resultsLength" show-progress variant="secondary"
+                v-if="percent != 100">
+                <div class="progress-bar" :value="runningTotal"
+                    :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"></div>
             </div>
             <div class="list-group" flush>
                 <div class="list-group-item" v-for="result in facetResults" :key="result.label">
                     <div>
-                        <a
-                            href
-                            class="sidebar-text text-content-area text-view"
-                            v-if="facet.facet !== 'all_collocates'"
-                            @click.prevent="facetClick(result.metadata)"
-                            >{{ result.label }}</a
-                        >
-                        <a
-                            href
-                            class="sidebar-text text-content-area"
-                            v-else
-                            @click.prevent="collocationToConcordance(result.label)"
-                            >{{ result.label }}</a
-                        >
+                        <a href class="sidebar-text text-content-area text-view" v-if="facet.facet !== 'all_collocates'"
+                            @click.prevent="facetClick(result.metadata)">{{ result.label }}</a>
+                        <a href class="sidebar-text text-content-area" v-else
+                            @click.prevent="collocationToConcordance(result.label)">{{ result.label }}</a>
                         <div class="badge bg-secondary rounded-pill float-end">{{ result.count }}</div>
                     </div>
-                    <div
-                        style="line-height: 70%; padding-bottom: 15px; font-size: 85%"
-                        v-if="showingRelativeFrequencies"
-                    >
+                    <div style="line-height: 70%; padding-bottom: 15px; font-size: 85%"
+                        v-if="showingRelativeFrequencies">
                         <div style="display: inline-block; opacity: 0.8">
                             {{
-                                $t("facets.relativeFrequencyDescription", {
-                                    total: fullResults.unsorted[result.label].count,
-                                    wordCount: fullRelativeFrequencies[result.label].total_count,
-                                })
+                    $t("facets.relativeFrequencyDescription", {
+                        total: fullResults.unsorted[result.label].count,
+                        wordCount: fullRelativeFrequencies[result.label].total_count,
+                    })
                             }}
                         </div>
                     </div>
@@ -405,59 +359,72 @@ export default {
 .card-header {
     font-variant: small-caps;
 }
+
 .dropdown-header {
     padding: 0.5rem 0;
     font-variant: small-caps;
 }
+
 .list-group-item {
     border-left-width: 0;
     border-right-width: 0;
 }
+
 .close-box {
     position: absolute;
     line-height: 1.9;
     top: 0;
     right: 0;
 }
+
 .list-group-item {
     position: relative;
     padding: 0.5rem 1.25rem;
 }
+
 .sidebar-text {
     cursor: pointer;
 }
+
 .sidebar-count {
     width: 100%;
     display: inline-block;
 }
+
 .facet-selection {
     width: 100%;
     cursor: pointer;
 }
+
 .facet-selection:hover {
     font-weight: 700;
 }
+
 .slide-fade-enter-active {
     transition: all 0.3s ease-out;
 }
+
 .slide-fade-leave-active {
     transition: all 0.3s ease-out;
 }
+
 .slide-fade-enter,
 .slide-fade-leave-to {
     transform: translateY(-10px);
     height: 0;
     opacity: 0;
 }
+
 .options-slide-fade-enter-active {
     transition: all 0.3s ease-in;
 }
+
 .options-slide-fade-leave-active {
     transition: all 0.3s ease-in;
 }
+
 .options-slide-fade-enter,
 .options-slide-fade-leave-to {
     opacity: 0;
 }
 </style>
-

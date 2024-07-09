@@ -1,13 +1,9 @@
 <template>
-    <div class="container-fluid">
+    <div class="container-fluid" role="main">
         <results-summary :description="results.description"></results-summary>
         <div style="position: relative" v-if="!showFacets && philoConfig.facets.length > 0">
-            <button
-                type="button"
-                class="btn btn-secondary"
-                style="position: absolute; bottom: 1rem; right: 0.5rem"
-                @click="toggleFacets()"
-            >
+            <button type="button" class="btn btn-secondary" style="position: absolute; bottom: 1rem; right: 0.5rem"
+                @click="toggleFacets()">
                 {{ $t("common.showFacets") }}
             </button>
         </div>
@@ -16,107 +12,69 @@
                 <div class="card p-2 ml-2 shadow-sm">
                     <div class="p-2 mb-1">
                         <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" style="border-right: solid">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                :aria-label="$t('kwic.sortResultsBy')" style=" border-right: solid">
                                 {{ $t("kwic.sortResultsBy") }}
                             </button>
                             <div class="btn-group" v-for="(fields, index) in sortingFields" :key="index">
                                 <div class="dropdown">
-                                    <button
-                                        class="btn btn-light btn-sm dropdown-toggle sort-toggle"
-                                        :style="index == 0 ? 'border-left: 0 !important' : ''"
-                                        :id="`kwicDrop${index}`"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false"
-                                    >
+                                    <button class="btn btn-light btn-sm dropdown-toggle sort-toggle"
+                                        :style="index == 0 ? 'border-left: 0 !important' : ''" :id="`kwicDrop${index}`"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
                                         {{ sortingSelection[index] }}
                                     </button>
                                     <ul class="dropdown-menu" :aria-labelledby="`kwicDrop${index}`">
-                                        <li
-                                            class="dropdown-item"
-                                            v-for="(selection, fieldIndex) in fields"
-                                            :key="fieldIndex"
-                                            @click="updateSortingSelection(index, selection)"
-                                        >
+                                        <li class="dropdown-item" v-for="(selection, fieldIndex) in fields"
+                                            :key="fieldIndex" @click="updateSortingSelection(index, selection)">
                                             {{ selection.label }}
                                         </li>
                                     </ul>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-secondary btn-sm" @click="sortResults()">
+                            <button type="button" class="btn btn-secondary btn-sm" :aria-label="$t('kwic.sort')"
+                                @click="sortResults()">
                                 {{ $t("kwic.sort") }}
                             </button>
                         </div>
                         <div class="float-lg-end mt-lg-0 mt-md-2">
                             <div class="btn-group" role="group">
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-outline-secondary"
-                                    style="border-right: solid"
-                                >
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    style="border-right: solid">
                                     {{ $t("kwic.resultsDisplayed") }}
                                 </button>
                                 <div class="dropdown d-inline-block">
-                                    <button
-                                        class="btn btn-sm btn-light dropdown-toggle"
-                                        style="
+                                    <button class="btn btn-sm btn-light dropdown-toggle" style="
                                             border-left: 0 !important;
                                             border-bottom-left-radius: 0;
                                             border-top-left-radius: 0;
-                                        "
-                                        type="button"
-                                        id="kwic-results-per-page"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false;"
-                                    >
+                                        " type="button" id="kwic-results-per-page" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
                                         {{ results_per_page }}
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="kwic-results-per-page">
                                         <li>
-                                            <a
-                                                class="dropdown-item"
-                                                v-for="number in ['25', '100', '500', '1000']"
-                                                :key="number"
-                                                @click="switchResultsPerPage(number)"
-                                                >{{ number }}</a
-                                            >
+                                            <a class="dropdown-item" v-for="number in ['25', '100', '500', '1000']"
+                                                :key="number" @click="switchResultsPerPage(number)">{{ number }}</a>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
-                        <div
-                            class="progress mt-3"
-                            :max="resultsLength"
-                            show-progress
-                            variant="secondary"
-                            v-if="runningTotal != resultsLength"
-                        >
-                            <div
-                                class="progress-bar"
-                                role="progressbar"
-                                aria-valuemin="0"
-                                aria-valuemax="100"
-                                :style="`width: ${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
-                            >
+                        <div class="progress mt-3" :max="resultsLength" show-progress variant="secondary"
+                            v-if="runningTotal != resultsLength">
+                            <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                                :style="`width: ${((runningTotal / resultsLength) * 100).toFixed(2)}%`">
                                 {{ Math.floor((runningTotal / resultsLength) * 100) }}%
                             </div>
                         </div>
                     </div>
                     <div id="kwic-concordance">
                         <transition-group tag="div" :css="false" v-on:before-enter="onBeforeEnter" v-on:enter="onEnter">
-                            <div
-                                class="kwic-line"
-                                v-for="(result, kwicIndex) in filteredKwic(results.results)"
-                                :key="result.philo_id.join('-')"
-                                :data-index="kwicIndex"
-                            >
+                            <div class="kwic-line" v-for="(result, kwicIndex) in filteredKwic(results.results)"
+                                :key="result.philo_id.join('-')" :data-index="kwicIndex">
                                 <span v-html="initializePos(kwicIndex)"></span>
-                                <router-link
-                                    :to="result.citation_links.div1"
-                                    class="kwic-biblio"
-                                    @mouseover="showFullBiblio($event)"
-                                    @mouseleave="hideFullBiblio($event)"
-                                >
+                                <router-link :to="result.citation_links.div1" class="kwic-biblio"
+                                    @mouseover="showFullBiblio($event)" @mouseleave="hideFullBiblio($event)">
                                     <span class="full-biblio" style="display: none">{{ result.fullBiblio }}</span>
                                     <span class="short-biblio" v-html="result.shortBiblio"></span>
                                 </router-link>
@@ -135,12 +93,12 @@
 </template>
 
 <script>
+import gsap from "gsap";
 import { computed } from "vue";
 import { mapFields } from "vuex-map-fields";
-import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
-import gsap from "gsap";
+import ResultsSummary from "./ResultsSummary";
 
 export default {
     name: "kwic-report",
@@ -419,7 +377,7 @@ export default {
             this.results.results = [];
             this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
         },
-        dicoLookup() {},
+        dicoLookup() { },
         onBeforeEnter(el) {
             el.style.opacity = 0;
         },
@@ -453,19 +411,23 @@ export default {
     border-bottom-right-radius: 0;
     border-top-right-radius: 0;
 }
+
 #kwic-concordance {
     font-family: monospace;
 }
+
 .kwic-line {
     line-height: 180%;
     white-space: nowrap;
     overflow: hidden;
 }
+
 .kwic-biblio {
     font-weight: 400 !important;
     z-index: 10;
     padding-right: 0.5rem;
 }
+
 .short-biblio {
     width: 200px;
     white-space: nowrap;
@@ -476,11 +438,13 @@ export default {
     margin-left: -5px;
     padding-left: 5px;
 }
+
 .full-biblio {
     z-index: 10;
     display: none;
     opacity: 0;
 }
+
 .full-biblio.show {
     position: absolute;
     background-color: #fff;
@@ -490,61 +454,76 @@ export default {
     margin-left: -5px;
     opacity: 1;
 }
+
 :deep(.kwic-before) {
     text-align: right;
     overflow: hidden;
     display: inline-block;
     position: absolute;
 }
+
 :deep(.inner-before) {
     float: right;
 }
+
 :deep(.kwic-after) {
     text-align: left;
     display: inline-block;
 }
+
 :deep(.kwic-text) {
     display: inline-block;
     overflow: hidden;
     vertical-align: bottom;
 }
+
 #kwic-switch {
     margin-left: -3px;
 }
+
 @media (min-width: 1300px) {
     :deep(.kwic-highlight) {
         margin-left: 330px;
     }
+
     :deep(.kwic-before) {
         width: 330px;
     }
 }
+
 @media (min-width: 992px) and (max-width: 1299px) {
     :deep(.kwic-highlight) {
         margin-left: 230px;
     }
+
     :deep(.kwic-before) {
         width: 230px;
     }
 }
+
 @media (min-width: 768px) and (max-width: 991px) {
     :deep(.kwic-highlight) {
         margin-left: 120px;
     }
+
     :deep(.kwic-before) {
         width: 120px;
     }
+
     :deep(.kwic-line) {
         font-size: 12px;
     }
 }
+
 @media (max-width: 767px) {
     :deep(.kwic-highlight) {
         margin-left: 200px;
     }
+
     :deep(.kwic-before) {
         width: 200px;
     }
+
     :deep(.kwic-line) {
         font-size: 12px;
     }

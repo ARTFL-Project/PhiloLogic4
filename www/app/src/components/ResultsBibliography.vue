@@ -10,7 +10,8 @@
                     <li class="result" v-for="(result, resultIndex) in uniquedResults" :key="resultIndex">
                         <citations :citation="result.citation"></citations>
                         <router-link :to="`/${report}?${buildLink(result.metadata_fields.title)}`">
-                            <button type="button" class="btn rounded-pill btn-outline-secondary btn-sm ms-3">
+                            <button type="button" class="btn rounded-pill btn-outline-secondary btn-sm ms-3"
+                                :aria-label="`${result.count} ${$t('resultsBiblio.occurrences')}`">
                                 {{ result.count }} {{ $t("resultsBiblio.occurrences") }}
                             </button>
                         </router-link>
@@ -21,8 +22,8 @@
     </div>
 </template>
 <script>
-import citations from "./Citations";
 import { mapFields } from "vuex-map-fields";
+import citations from "./Citations";
 
 export default {
     name: "ResultsBibliography",
@@ -80,6 +81,7 @@ export default {
 #results-bibliography {
     padding-inline-start: 2rem;
 }
+
 .result {
     list-style-type: circle;
     line-height: 2.5;

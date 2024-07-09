@@ -1,60 +1,40 @@
 <template>
-    <div class="container-fluid">
+    <div class="container-fluid" role="main">
         <results-summary :description="results.description"></results-summary>
         <div style="position: relative" v-if="!showFacets && philoConfig.facets.length > 0">
-            <button
-                type="button"
-                class="btn btn-sm btn-secondary"
-                style="position: absolute; bottom: 0; right: 0.5rem; padding: 0.125rem 0.25rem"
-                @click="toggleFacets()"
-            >
+            <button type="button" class="btn btn-sm btn-secondary"
+                style="position: absolute; bottom: 0; right: 0.5rem; padding: 0.125rem 0.25rem" @click="toggleFacets()">
                 {{ $t("common.showFacets") }}
             </button>
         </div>
         <div class="row mt-4" style="padding-right: 0.5rem">
-            <div
-                class="col-12"
-                :class="{ 'col-md-9': showFacets, 'col-xl-9': showFacets }"
-                v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'"
-            >
+            <div class="col-12" :class="{ 'col-md-9': showFacets, 'col-xl-9': showFacets }"
+                v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'">
                 <transition-group tag="div" :css="false" v-on:before-enter="beforeEnter" v-on:enter="enter">
-                    <div
-                        class="card philologic-occurrence mx-2 mb-4 shadow-sm"
-                        v-for="(result, index) in results.results"
-                        :key="result.philo_id.join('-')"
-                    >
+                    <div class="card philologic-occurrence mx-2 mb-4 shadow-sm"
+                        v-for="(result, index) in results.results" :key="result.philo_id.join('-')">
                         <div class="row citation-container">
                             <div class="col-12 col-sm-10 col-md-11">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
                                     <span class="number">{{ results.description.start + index }}</span>
-                                    <input
-                                        type="checkbox"
-                                        class="ms-3 me-2"
+                                    <input type="checkbox" class="ms-3 me-2"
                                         :id="`biblio-index-${results.description.start + index}`"
                                         @click="addToSearch(result.metadata_fields.title)"
-                                        v-if="resultType == 'doc' && philoConfig.metadata.indexOf('title') !== -1"
-                                    />
+                                        v-if="resultType == 'doc' && philoConfig.metadata.indexOf('title') !== -1" />
                                     <label class="d-inline" :for="`biblio-index-${results.description.start + index}`">
-                                        <citations :citation="result.citation"></citations
-                                    ></label>
+                                        <citations :citation="result.citation"></citations>
+                                    </label>
                                 </span>
                             </div>
                         </div>
                     </div>
                 </transition-group>
             </div>
-            <div
-                class="col-12"
-                :class="{ 'col-md-9': showFacets, 'col-xl-9': showFacets }"
-                v-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'"
-            >
+            <div class="col-12" :class="{ 'col-md-9': showFacets, 'col-xl-9': showFacets }"
+                v-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'">
                 <div class="list-group" flush v-for="(group, groupKey) in results.results" :key="groupKey">
-                    <div
-                        class="list-group-item p-0"
-                        v-for="(result, index) in group"
-                        :key="index"
-                        style="border-width: 0"
-                    >
+                    <div class="list-group-item p-0" v-for="(result, index) in group" :key="index"
+                        style="border-width: 0">
                         <div class="card philologic-occurrence mx-2 mb-4 shadow-sm">
                             <div class="citation-dico-container">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
@@ -77,13 +57,13 @@
     </div>
 </template>
 <script>
+import gsap from "gsap";
 import { computed } from "vue";
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
-import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
-import gsap from "gsap";
+import ResultsSummary from "./ResultsSummary";
 
 export default {
     name: "bibliography-report",
@@ -218,9 +198,11 @@ export default {
 .citation-container {
     border-width: 0 !important;
 }
+
 .citation-dico-container {
     border-bottom: solid 1px #eee !important;
 }
+
 .number {
     background-color: rgb(78, 93, 108);
     color: #fff;
@@ -231,6 +213,7 @@ export default {
     margin-right: 5px;
     border-radius: 0.25rem;
 }
+
 .text-content {
     text-align: justify;
 }

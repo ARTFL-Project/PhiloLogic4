@@ -1,18 +1,16 @@
 <template>
-    <div id="app">
+    <div id="philologic-app">
         <Header />
         <SearchForm v-if="accessAuthorized" />
         <router-view v-if="accessAuthorized" />
         <access-control :client-ip="clientIp" :domain-name="domainName" v-if="!accessAuthorized" />
-        <div class="container-fluid" v-if="accessAuthorized">
+        <div class="container-fluid" role="complementary" aria-label="Footer" v-if="accessAuthorized">
             <div class="text-center mb-4">
-                <hr class="mb-3" width="20%" style="margin: auto" />
+                <hr class="mb-3" style="width:20%; margin: auto" />
                 Powered by
                 <br />
-                <a
-                    href="https://artfl-project.uchicago.edu/"
-                    title="Philologic 4: Open Source ARTFL Search and Retrieval Engine"
-                >
+                <a href="https://artfl-project.uchicago.edu/"
+                    title="Philologic 4: Open Source ARTFL Search and Retrieval Engine">
                     <img src="./assets/philo.png" alt="PhiloLogic" height="40" width="110" />
                 </a>
             </div>
@@ -22,10 +20,10 @@
 
 <script>
 import { defineAsyncComponent } from "vue";
+import { mapFields } from "vuex-map-fields";
 import Header from "./components/Header.vue";
 const SearchForm = defineAsyncComponent(() => import("./components/SearchForm.vue"));
 const AccessControl = defineAsyncComponent(() => import("./components/AccessControl.vue"));
-import { mapFields } from "vuex-map-fields";
 
 export default {
     name: "app",
@@ -220,23 +218,29 @@ export default {
 a {
     text-decoration: none;
 }
+
 .btn:focus {
     box-shadow: none !important;
 }
+
 .modal-backdrop {
     opacity: 0.7;
 }
+
 .highlight {
-    color: #ef4500;
-    font-weight: 400;
+    color: #900;
+    font-weight: 700;
 }
+
 .passage-highlight {
     display: inline-block;
     color: royalblue;
 }
+
 li {
     list-style-type: none;
 }
+
 body,
 .btn,
 select,
@@ -247,16 +251,19 @@ input {
     font-size: 14px !important;
     font-family: "Open-Sans", sans-serif;
 }
+
 .text-view {
     font-family: "Source Serif Pro", serif;
     font-size: 0.9rem;
 }
+
 .custom-control {
     min-height: auto;
 }
-.toc-div1 > a,
-.toc-div2 > a,
-.toc-div3 > a {
+
+.toc-div1>a,
+.toc-div2>a,
+.toc-div3>a {
     padding: 5px 5px 5px 0px;
 }
 
@@ -307,6 +314,7 @@ input {
 .toc-div3:hover {
     cursor: pointer;
 }
+
 br {
     content: " ";
     display: block;

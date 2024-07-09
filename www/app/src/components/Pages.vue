@@ -3,14 +3,8 @@
         <div class="row">
             <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2">
                 <div class="btn-group shadow" role="group">
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        v-for="page in pages"
-                        :key="page.display"
-                        :class="page.active"
-                        @click="goToPage(page.start, page.end)"
-                    >
+                    <button type="button" class="btn btn-outline-secondary" v-for="page in pages" :key="page.display"
+                        :class="page.active" @click="goToPage(page.start, page.end)">
                         <span class="page-number">{{ page.display }}</span>
                         <span class="page-range">{{ page.range }}</span>
                     </button>
@@ -140,15 +134,18 @@ export default {
 .page {
     transition: width 0.4s ease !important;
 }
+
 .btn {
     line-height: initial !important;
 }
+
 .page-number {
     display: block;
     font-size: 110%;
 }
+
 .page-range {
     font-size: 80%;
-    opacity: 0.7;
+    /* opacity: 0.7; */
 }
 </style>

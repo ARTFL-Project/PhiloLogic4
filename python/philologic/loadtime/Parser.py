@@ -2,13 +2,13 @@
 """PhiloLogic4 main parser"""
 
 import os
-import regex as re
 import string
 import sys
+from collections import deque
 
+import regex as re
 from philologic.loadtime.OHCOVector import CompoundStack
 from philologic.utils import convert_entities, extract_full_date, extract_integer
-from collections import deque
 
 DEFAULT_TAG_TO_OBJ_MAP = {
     "div": "div",
@@ -1566,7 +1566,7 @@ if __name__ == "__main__":
             metadata_to_parse=DEFAULT_METADATA_TO_PARSE,
             metadata_sql_types={},
             sentence_breakers=["。"],
-            file_type="html",
-            token_regex=r"[\p{L}\p{M}\p{N}]+|[&\p{L};]+",
+            file_type="xml",
+            token_regex=r"[\p{L}\p{M}\p{N}]|[&\p{L};]",
         )
         parser.parse(fh)

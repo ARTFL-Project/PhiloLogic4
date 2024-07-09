@@ -1,25 +1,17 @@
 <template>
-    <div class="container-fluid">
+    <div class="container-fluid" role="main">
         <results-summary :description="results.description"></results-summary>
         <div style="position: relative" v-if="!showFacets && philoConfig.facets.length > 0">
-            <button
-                type="button"
-                class="btn btn-secondary"
-                style="position: absolute; bottom: 1rem; right: 0.5rem"
-                @click="toggleFacets()"
-            >
+            <button type="button" class="btn btn-secondary" style="position: absolute; bottom: 1rem; right: 0.5rem"
+                @click="toggleFacets()">
                 {{ $t("common.showFacets") }}
             </button>
         </div>
         <div class="row" style="padding-right: 0.5rem">
             <div class="col-12" :class="{ 'col-md-9': showFacets, 'col-xl-9': showFacets }">
                 <transition-group tag="div" :css="false" v-on:before-enter="onBeforeEnter" v-on:enter="onEnter">
-                    <div
-                        class="card philologic-occurrence ms-2 me-2 mb-3 shadow-sm"
-                        v-for="(result, index) in results.results"
-                        :key="result.philo_id.join('-')"
-                        :data-index="index"
-                    >
+                    <div class="card philologic-occurrence ms-2 me-2 mb-3 shadow-sm"
+                        v-for="(result, index) in results.results" :key="result.philo_id.join('-')" :data-index="index">
                         <div class="row citation-container g-0">
                             <div class="col-12 cpl-sm-10 col-md-11">
                                 <span class="cite">
@@ -28,21 +20,16 @@
                                 </span>
                             </div>
                             <div class="col-sm-2 col-md-1 d-none d-sm-inline-block">
-                                <button
-                                    type="button"
-                                    class="btn btn-secondary more-context"
-                                    @click="moreContext(index, $event)"
-                                >
+                                <button type="button" class="btn btn-secondary more-context"
+                                    @click="moreContext(index, $event)">
                                     <span class="more d-none d-lg-inline-block">{{ $t("concordance.more") }}</span>
                                 </button>
                             </div>
                         </div>
                         <div class="row">
-                            <div
-                                class="col m-2 concordance-text text-view"
+                            <div class="col m-2 concordance-text text-view"
                                 :position="results.description.start + index"
-                                @keyup="dicoLookup($event, result.metadata_fields.year)"
-                            >
+                                @keyup="dicoLookup($event, result.metadata_fields.year)">
                                 <div class="default-length" v-html="result.context"></div>
                                 <div class="more-length"></div>
                             </div>
@@ -59,13 +46,13 @@
 </template>
 
 <script>
+import gsap from "gsap";
 import { computed } from "vue";
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
-import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
-import gsap from "gsap";
+import ResultsSummary from "./ResultsSummary";
 
 export default {
     name: "concordance-report",
@@ -171,7 +158,7 @@ export default {
                 button.innerHTML = this.$t("concordance.more");
             }
         },
-        dicoLookup() {},
+        dicoLookup() { },
         toggleFacets() {
             if (this.showFacets) {
                 this.showFacets = false;
@@ -197,25 +184,30 @@ export default {
 .concordance-text {
     text-align: justify;
 }
+
 .philologic-occurrence {
     left: 0;
     position: relative;
 }
+
 .separator {
     padding: 5px;
     font-size: 60%;
     display: inline-block;
     vertical-align: middle;
 }
+
 .more-context {
     line-height: 1.8;
     position: absolute;
     right: 0;
 }
+
 .more_context,
 .citation-container {
     border-bottom: solid 1px #eee !important;
 }
+
 .number {
     background-color: rgb(78, 93, 108);
     color: #fff;
@@ -227,28 +219,34 @@ export default {
     border-radius: 0.25rem;
     height: 100%;
 }
+
 .hit_n {
     vertical-align: 5px;
     /*align numbers*/
 }
+
 .cite {
     height: 38px;
     display: inline-block;
 }
+
 .philologic-doc {
     font-variant: small-caps;
     font-weight: 700;
 }
+
 .citation-separator {
     margin-left: 8px;
     padding-left: 8px;
     border-left: double 3px darkgray;
 }
+
 .page-display {
     margin-left: 8px;
     padding-left: 8px;
     border-left: double 3px darkgray;
 }
+
 .citation-small-caps {
     font-variant: small-caps;
 }
@@ -257,10 +255,12 @@ export default {
 .xml-speaker {
     font-weight: 700;
 }
-.xml-sp + .xml-l,
-.xml-sp + .xml-ab {
+
+.xml-sp+.xml-l,
+.xml-sp+.xml-ab {
     display: inline;
 }
+
 .xml-stage {
     font-style: italic;
 }
