@@ -14,7 +14,7 @@
                     </button>
                 </div>
                 <div class="p-3 mt-4" style="min-height: 500px; max-height: 800px">
-                    <canvas id="bar" class="chart"></canvas>
+                    <canvas id="bar" class="chart" aria-label="Bar Graph"></canvas>
                 </div>
             </div>
         </div>

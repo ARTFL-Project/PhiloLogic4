@@ -364,7 +364,7 @@ class XMLParser:
         tag_to_obj_map=DEFAULT_TAG_TO_OBJ_MAP,
         metadata_to_parse=DEFAULT_METADATA_TO_PARSE,
         file_type="xml",
-        lowercase_index=False,
+        lowercase_index=True,
         **parse_options,
     ):
         """Initialize class"""
@@ -1565,8 +1565,7 @@ if __name__ == "__main__":
             tag_to_obj_map=DEFAULT_TAG_TO_OBJ_MAP,
             metadata_to_parse=DEFAULT_METADATA_TO_PARSE,
             metadata_sql_types={},
-            sentence_breakers=["。"],
             file_type="xml",
-            token_regex=r"[\p{L}\p{M}\p{N}]|[&\p{L};]",
+            token_regex=r"[\p{L}\p{M}\p{N}]+|[&\p{L};]+",
         )
         parser.parse(fh)
